@@ -1,5 +1,12 @@
 module uart_rx #(
     // Comprimento de uma palavra a ser enviada para a UART
+    // Baud Rate
+    parameter BAUD_RATE = 9600,
+    // Frequencia do sinal de clock utilizado no sistema
+    parameter CLOCK_HZ = 50_000_000,
+    // Quantidade de bits = 1 ao final da palavra
+    parameter STOP_BITS = 1,
+    // numero de data bits por transmissao
     parameter N_BITS = 8
 ) (
     input clk,
@@ -9,13 +16,6 @@ module uart_rx #(
     output finished,
     output reg [N_BITS -1: 0] data
 );
-
-// Baud Rate
-parameter BAUD_RATE = 9600;
-// Frequencia do sinal de clock utilizado no sistema
-parameter CLOCK_HZ = 50_000_000; // 50 MHz
-// Quantidade de bits = 1 ao final da palavra
-parameter STOP_BITS = 1;
 
 // Bits enviados por nano segundo
 localparam BITS_PNS = 1_000_000_000 * 1/BAUD_RATE;
@@ -98,7 +98,7 @@ always @(posedge clk) begin: add_received
     if (reset) current_data <= 0;
     else if (current_state == IDLE) current_data <= 0;
     else if (current_state == RECEIVE && counter_finished) begin
-        current_data[data_counter[2:0]] <= received;
+        current_data[data_counter[2:0]] <= sample;
     end
 end
 
