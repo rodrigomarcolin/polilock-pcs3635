@@ -1,0 +1,5 @@
+/modelsim
+/quartus
+*.bak
+
+.vscode
