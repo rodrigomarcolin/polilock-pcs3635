@@ -19,10 +19,12 @@ module fluxo_dados (
     input zeraC,
     input zeraT,
     input escreve,
+    input [1:0] funcao,
     input [3:0] max_tentativas,
 
     output igual,
     output excedeu,
+    output funcao_selecionada,
     output fim_verificacao,
 
     output [7:0] db_memoria,
@@ -96,5 +98,13 @@ module fluxo_dados (
 		.AEBi( 1'b1 ),
 		.AEBo( excedeu )
 	);
+
+    // detector de bordas
+    edge_detector detector (
+        .clock ( clock ),
+        .reset ( ~(|funcao) ),
+        .sinal ( |funcao ),
+        .pulso ( funcao_selecionada )
+    );
 
 endmodule

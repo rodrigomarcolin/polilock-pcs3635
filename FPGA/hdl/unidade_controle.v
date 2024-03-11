@@ -20,6 +20,7 @@ module unidade_controle (
     input igual,
     input excedeu,
     input fim_verificacao,
+    input funcao_selecionada,
     // 2'b01 se verificacao, 2'b10 se configuracao
     input [1:0] funcao,
 
@@ -51,6 +52,7 @@ module unidade_controle (
     parameter grava          = 4'b1010;  // A
     parameter proximo_end    = 4'b1011;  // B
     parameter espera_mem2    = 4'b1100;  // C
+    parameter espera_funcao  = 4'b1101;  // D
 
     // Variaveis de estado
     reg [3:0] Eatual, Eprox;
@@ -67,11 +69,12 @@ module unidade_controle (
     always @* begin
         case (Eatual)
             inicial: Eprox = iniciar ? preparacao : inicial;
-            preparacao: Eprox = escolhe_funcao;
+            preparacao: Eprox = espera_funcao;
+            espera_funcao: Eprox = funcao_selecionada ? escolhe_funcao : espera_funcao;
             escolhe_funcao: begin
                 if (funcao == 2'b01) Eprox = comparacao;
                 else if (funcao == 2'b10) Eprox = grava;
-                else Eprox = escolhe_funcao;
+                else Eprox = espera_funcao;
             end
             comparacao: begin
                 if (igual == 0) Eprox = conta_tent;
@@ -121,6 +124,7 @@ module unidade_controle (
             grava:         db_estado = 4'b1010;  // A
             proximo_end:   db_estado = 4'b1011;  // B
             espera_mem2:   db_estado = 4'b1100;  // C
+            espera_funcao: db_estado = 4'b1101;  // D
             default:       db_estado = 4'b1111;  // F
         endcase
     end

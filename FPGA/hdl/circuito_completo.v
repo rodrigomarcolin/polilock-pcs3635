@@ -29,6 +29,7 @@ module circuito_completo (
     wire s_igual;
     wire s_excedeu;
     wire s_fim_verificacao;
+    wire s_funcao_selecionada;
     wire s_contaC;
     wire s_contaT;
     wire s_zeraC;
@@ -45,7 +46,8 @@ module circuito_completo (
         .iniciar( iniciar),
         .igual ( s_igual ),
         .excedeu ( s_excedeu ),
-        .fim_verificacao (s_fim_verificacao),
+        .fim_verificacao ( s_fim_verificacao ),
+        .funcao_selecionada ( s_funcao_selecionada ),
         .funcao ( funcao ),
         .contaC ( s_contaC ),
         .contaT ( s_contaT ),
@@ -65,10 +67,12 @@ module circuito_completo (
         .zeraC  ( s_zeraC ),
         .zeraT  ( s_zeraT ),
         .escreve ( s_escreve ),
+        .funcao  ( funcao ),
         .max_tentativas ( 3 ),
         .igual ( s_igual ),
         .excedeu ( s_excedeu ),
         .fim_verificacao ( s_fim_verificacao ),
+        .funcao_selecionada ( s_funcao_selecionada ),
         .db_memoria ( s_db_memoria ),
         .db_contagem ( s_db_contagem )
     );
