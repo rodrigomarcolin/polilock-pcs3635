@@ -37,6 +37,7 @@ module fluxo_dados (
     wire [3:0] s_tentativas;
 
     assign db_contagem = s_endereco;
+	 assign db_memoria = s_memoria_principal;
 
     sync_rom_16x8 rom (
         .clock    ( clock ),

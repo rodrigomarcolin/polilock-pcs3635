@@ -41,18 +41,18 @@ module unidade_controle (
     // Define estados
     parameter inicial        = 4'b0000;  // 0
     parameter preparacao     = 4'b0001;  // 1
-    parameter escolhe_funcao = 4'b0010;  // 2
-    parameter comparacao     = 4'b0011;  // 3
-    parameter proximo_char   = 4'b0100;  // 4
-    parameter espera_mem1    = 4'b0101;  // 5
-    parameter conta_tent     = 4'b0110;  // 6
-    parameter ganhou         = 4'b0111;  // 7
-    parameter perdeu         = 4'b1000;  // 8
-    parameter bloqueado      = 4'b1001;  // 9
-    parameter grava          = 4'b1010;  // A
-    parameter proximo_end    = 4'b1011;  // B
-    parameter espera_mem2    = 4'b1100;  // C
-    parameter espera_funcao  = 4'b1101;  // D
+    parameter espera_funcao  = 4'b0010;  // 2
+    parameter escolhe_funcao = 4'b0011;  // 3
+    parameter comparacao     = 4'b0100;  // 4
+    parameter proximo_char   = 4'b0101;  // 5
+    parameter espera_mem1    = 4'b0110;  // 6
+    parameter conta_tent     = 4'b0111;  // 7
+    parameter ganhou         = 4'b1000;  // 8
+    parameter perdeu         = 4'b1001;  // 9
+    parameter bloqueado      = 4'b1010;  // A
+    parameter grava          = 4'b1011;  // B
+    parameter proximo_end    = 4'b1100;  // C
+    parameter espera_mem2    = 4'b1101;  // D
 
     // Variaveis de estado
     reg [3:0] Eatual, Eprox;
@@ -113,18 +113,18 @@ module unidade_controle (
         case (Eatual)
             inicial:       db_estado = 4'b0000;  // 0
             preparacao:    db_estado = 4'b0001;  // 1
-            escolhe_funcao:db_estado = 4'b0010;  // 2
-            comparacao:    db_estado = 4'b0011;  // 3
-            proximo_char:  db_estado = 4'b0100;  // 4
-            espera_mem1:   db_estado = 4'b0101;  // 5
-            conta_tent:    db_estado = 4'b0110;  // 6
-            ganhou:        db_estado = 4'b0111;  // 7
-            perdeu:        db_estado = 4'b1000;  // 8
-            bloqueado:     db_estado = 4'b1001;  // 9
-            grava:         db_estado = 4'b1010;  // A
-            proximo_end:   db_estado = 4'b1011;  // B
-            espera_mem2:   db_estado = 4'b1100;  // C
-            espera_funcao: db_estado = 4'b1101;  // D
+            espera_funcao :db_estado = 4'b0010;  // 2
+            escolhe_funcao:db_estado = 4'b0011;  // 3
+            comparacao:    db_estado = 4'b0100;  // 4
+            proximo_char:  db_estado = 4'b0101;  // 5
+            espera_mem1:   db_estado = 4'b0110;  // 6
+            conta_tent:    db_estado = 4'b0111;  // 7
+            ganhou:        db_estado = 4'b1000;  // 8
+            perdeu:        db_estado = 4'b1001;  // 9
+            bloqueado:     db_estado = 4'b1010;  // A
+            grava:         db_estado = 4'b1011;  // B
+            proximo_end:   db_estado = 4'b1100;  // C
+            espera_mem2:   db_estado = 4'b1101;  // D
             default:       db_estado = 4'b1111;  // F
         endcase
     end
