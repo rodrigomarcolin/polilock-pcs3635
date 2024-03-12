@@ -37,6 +37,7 @@ void setup()
 {
   softSerial.begin(9600);
   Serial.begin(9600);
+  pinMode(TX_PIN, output);
   setupButtons();
 }
 
