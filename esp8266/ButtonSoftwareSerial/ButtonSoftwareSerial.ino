@@ -3,6 +3,10 @@
 #define verifyButtonPin D2
 #define modifyButtonPin D3
 
+#define verifyLedPin D6
+#define modifyLedPin D7
+#define LED_BLINK_DELAY 500
+
 #define DEBOUNCE_DELAY 800
 #define OP_TO_PASS_DELAY 200
 
@@ -31,6 +35,8 @@ void updateState(Button &button);
 bool isButtonPressed(Button &button);
 bool isActionRequired(Button &button);
 bool isDebounceTimePassed(Button &button);
+void blinkLed(int pin);
+void setupLeds();
 
 void verifyPassword();
 void modifyPassword();
@@ -41,6 +47,7 @@ void setup()
   Serial.begin(9600);
   pinMode(TX_PIN, output);
   setupButtons();
+  setupLeds();
 }
 
 void loop()
@@ -90,11 +97,26 @@ bool isDebounceTimePassed(Button &button)
   return (millis() - button.lastDebounceTime) > DEBOUNCE_DELAY;
 }
 
+void blinkLed(int pin)
+{
+  digitalWrite(pin, HIGH);
+  delay(LED_BLINK_DELAY);
+  digitalWrite(pin, LOW);
+}
+
+void setupLeds()
+{
+  pinMode(verifyLedPin, OUTPUT);
+  pinMode(modifyLedPin, OUTPUT);
+}
+
 void modifyPassword()
 {
   softSerial.write(MODIFY_OPCODE);
   delay(OP_TO_PASS_DELAY);
   softSerial.write(passwordToModify);
+
+  blinkLed(modifyLedPin);
 }
 
 void verifyPassword()
@@ -102,4 +124,6 @@ void verifyPassword()
   softSerial.write(VERIFY_OPCODE);
   delay(OP_TO_PASS_DELAY);
   softSerial.write(passwordToVerify);
+
+  blinkLed(verifyLedPin);
 }
