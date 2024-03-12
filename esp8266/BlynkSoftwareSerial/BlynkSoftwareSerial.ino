@@ -32,7 +32,7 @@ void setup()
   softSerial.begin(BAUD_RATE);
   Serial.begin(BAUD_RATE);
 
-  pinMode(TX_PIN, output);
+  pinMode(TX_PIN, OUTPUT);
   setupLeds();
 
   Blynk.begin(BLYNK_AUTH_TOKEN, WIFI_SSID, WIFI_PASS, "blynk.cloud", 80);
@@ -47,14 +47,14 @@ void modifyPassword()
 {
   softSerial.write(MODIFY_OPCODE);
   delay(OP_TO_PASS_DELAY);
-  softSerial.write(passwordToModify);
+  //softSerial.write(passwordToModify);
 }
 
 void verifyPassword()
 {
   softSerial.write(VERIFY_OPCODE);
   delay(OP_TO_PASS_DELAY);
-  softSerial.write(passwordToVerify);
+  //softSerial.write(passwordToVerify);
 }
 
 void blinkLed(int pin)
