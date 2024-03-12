@@ -67,8 +67,8 @@ void setupButtons()
 
 bool isActionRequired(Button &button)
 {
-  bool isRequired = isButtonPressed(button) && !button.pressed;
-  if (isRequired && isDebounceTimePassed(button))
+  bool isRequired = isButtonPressed(button) && !button.pressed && isDebounceTimePassed(button);
+  if (isRequired)
   {
     button.lastDebounceTime = millis();
   }
