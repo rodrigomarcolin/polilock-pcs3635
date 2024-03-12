@@ -25,6 +25,7 @@ void setup()
 {
   softSerial.begin(9600);
   Serial.begin(9600);
+  pinMode(TX_PIN, output);
   Blynk.begin(BLYNK_AUTH_TOKEN, WIFI_SSID, WIFI_PASS, "blynk.cloud", 80);
   setupLeds();
 }
@@ -55,7 +56,8 @@ void blinkLed(int pin)
   digitalWrite(pin, LOW);
 }
 
-void setupLeds() {
+void setupLeds()
+{
   pinMode(verifyLedPin, OUTPUT);
   pinMode(modifyLedPin, OUTPUT);
 }
