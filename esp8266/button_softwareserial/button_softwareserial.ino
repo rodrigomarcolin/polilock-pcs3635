@@ -7,7 +7,8 @@
 #define RX_PIN 5
 #define TX_PIN 6
 
-typedef struct {
+typedef struct
+{
   bool pressed;
   int pin;
   unsigned long lastDebounceTime;
@@ -32,17 +33,22 @@ bool isDebounceTimePassed(Button &button);
 void verifyPassword();
 void modifyPassword();
 
-void setup() {
+void setup()
+{
+  softSerial.begin(9600);
   Serial.begin(9600);
   setupButtons();
 }
 
-void loop() {
-  if (isActionRequired(verifyButton)) {
+void loop()
+{
+  if (isActionRequired(verifyButton))
+  {
     verifyPassword();
   }
 
-  if (isActionRequired(modifyButton)) {
+  if (isActionRequired(modifyButton))
+  {
     modifyPassword();
   }
 
@@ -50,38 +56,46 @@ void loop() {
   updateState(modifyButton);
 }
 
-void setupButtons() {
+void setupButtons()
+{
   pinMode(verifyButtonPin, INPUT_PULLUP);
   pinMode(modifyButtonPin, INPUT_PULLUP);
 }
 
-bool isActionRequired(Button &button) {
+bool isActionRequired(Button &button)
+{
   bool isRequired = isButtonPressed(button) && !button.pressed;
-  if (isRequired && isDebounceTimePassed(button)) {
+  if (isRequired && isDebounceTimePassed(button))
+  {
     button.lastDebounceTime = millis();
   }
-  return isRequired; 
+  return isRequired;
 }
 
-void updateState(Button &button) {
+void updateState(Button &button)
+{
   button.pressed = isButtonPressed(button);
 }
 
-bool isButtonPressed(Button &button) {
+bool isButtonPressed(Button &button)
+{
   return digitalRead(button.pin) == LOW;
 }
 
-bool isDebounceTimePassed(Button &button) {
+bool isDebounceTimePassed(Button &button)
+{
   return (millis() - button.lastDebounceTime) > DEBOUNCE_DELAY;
 }
 
-void modifyPassword() {
+void modifyPassword()
+{
   softSerial.write(MODIFY_OPCODE);
   delay(200);
   softSerial.write(passwordToModify);
 }
 
-void verifyPassword() {
+void verifyPassword()
+{
   softSerial.write(VERIFY_OPCODE);
   delay(200);
   softSerial.write(passwordToVerify);
