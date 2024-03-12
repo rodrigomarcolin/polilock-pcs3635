@@ -79,7 +79,7 @@ end
 
 // realiza contagem de ciclos
 always @(posedge clk) begin: count_cycle
-    if (reset) cycle_counter <= 0;
+    if (reset || current_state == IDLE) cycle_counter <= 0;
     else if (counter_finished) cycle_counter <= 0;
     else if (
         current_state == START || 
