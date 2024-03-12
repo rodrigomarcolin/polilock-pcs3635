@@ -13,38 +13,79 @@
 
 module fluxo_dados (
     input clock,
+
+    input [7:0] serial_data,
     
     input contaC,
     input contaT,
+    input contaTo,
+    input contaS,
+
     input zeraC,
     input zeraT,
+    input zeraTo,
+    input zeraS,
+
+    input registraO,
+    input zeraO,
+
     input escreve,
-    input [1:0] funcao,
+    input escreve_serial,
+    input gravacao,
+
     input [3:0] max_tentativas,
 
     output igual,
     output excedeu,
-    output funcao_selecionada,
     output fim_verificacao,
+    output fim_gravacao,
+    output fim_time,
+
+    output [7:0] opcode,
 
     output [7:0] db_memoria,
     output [3:0] db_contagem
 );
 
     wire [3:0] s_endereco;
+    wire [3:0] s_endereco_gravacao;
     wire [7:0] s_memoria_serial;
     wire [7:0] s_memoria_principal;
     wire [3:0] s_tentativas;
+    wire [3:0] s_endereco_serial = gravacao ? s_endereco_gravacao : s_endereco;
 
     assign db_contagem = s_endereco;
-	 assign db_memoria = s_memoria_principal;
+	assign db_memoria = s_memoria_principal;
 
-    sync_rom_16x8 rom (
-        .clock    ( clock ),
-        .address  ( s_endereco ),
-        .data_out ( s_memoria_serial )
+    // memoria para armazenar saida serial
+    sync_ram_16x8_file #(
+        .BINFILE ("arquivo_inexistente.txt")
+    ) serial_ram (
+        .clk  ( clock ),
+        .addr ( s_endereco_serial ),
+        .data ( serial_data ),
+        .we   ( escreve_serial ),
+        .q    ( s_memoria_serial )
     );
 
+    // registrador de operacoes
+    registrador_8 opcode_reg (
+        .clock ( clock ),
+        .clear ( zeraO ),
+        .enable( registraO ),
+        .D     ( serial_data ),
+        .Q     ( opcode )
+    );
+
+    // contador de timeout
+    contador_m #(.M(250_000_000), .N($clog2(250_000_000))) contador_timeout (
+        .clock   ( clock ),
+        .conta   ( contaTo ),
+        .zera_as ( zeraTo ),
+        .fim     ( fim_time )
+    );
+
+    // contador de sequencia
 	contador_163 contador_sequencia (
 		.clock( clock ),
 		.clr  ( ~zeraC ),
@@ -65,8 +106,29 @@ module fluxo_dados (
 
     // comparador fim da verificacao
 	comparador_85 comparador_fim_verificacao (
-		.A   ( s_endereco ), // endereco atual
+		.A   ( s_endereco_gravacao ), // endereco atual
 		.B   ( 4'b1001 ), // 1001
+		.ALBi( 1'b0 ),
+		.AGBi( 1'b0 ),
+		.AEBi( 1'b1 ),
+		.AEBo( fim_gravacao )
+	);
+
+    // contador gravacao serial
+	contador_163 contador_gravacao (
+		.clock( clock ),
+		.clr  ( ~zeraS ),
+		.ld   ( 1'b1 ),
+		.ent  ( 1'b1 ),
+		.enp  ( contaS ),
+		.D    ( 4'b0 ),
+		.Q    ( s_endereco_gravacao )
+	);
+
+    // comparador fim da gravacao serial
+	comparador_85 comparador_fim_gravacao (
+		.A   ( s_endereco ), // endereco atual
+		.B   ( 4'b1010 ), // 1001
 		.ALBi( 1'b0 ),
 		.AGBi( 1'b0 ),
 		.AEBi( 1'b1 ),
@@ -80,6 +142,7 @@ module fluxo_dados (
 		.AEB ( igual )
 	);
 
+    // contador de tentativas
 	contador_163 contador_tentativas (
 		.clock( clock ),
 		.clr  ( ~zeraT ),
@@ -100,12 +163,5 @@ module fluxo_dados (
 		.AEBo( excedeu )
 	);
 
-    // detector de bordas
-    edge_detector detector (
-        .clock ( clock ),
-        .reset ( ~(|funcao) ),
-        .sinal ( |funcao ),
-        .pulso ( funcao_selecionada )
-    );
 
 endmodule

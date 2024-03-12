@@ -16,46 +16,64 @@ module unidade_controle (
     input reset,
     input iniciar,
 
+    input serial_finished,
     // sinais FD
     input igual,
     input excedeu,
     input fim_verificacao,
-    input funcao_selecionada,
-    // 2'b01 se verificacao, 2'b10 se configuracao
-    input [1:0] funcao,
+    input fim_gravacao,
+    input fim_time,
+    input [7:0] opcode, // "v" para verificacao, "m" para modificacao
 
     // saidas para FD
     output reg contaC,
     output reg contaT,
+    output reg contaTo,
+    output reg contaS,
+    
     output reg zeraC,
     output reg zeraT,
+    output reg zeraTo,
+    output reg zeraS,
+
+    output reg zeraO,
+    output reg registraO,
+
     output reg escreve,
+    output reg escreve_serial,
+    output reg gravacao,
 
     // saidas do circuito
     output reg acertou,
     output reg errou,
     output reg db_bloqueado,
-    output reg [3:0] db_estado
+    output reg [4:0] db_estado
 );
 
     // Define estados
-    parameter inicial        = 4'b0000;  // 0
-    parameter preparacao     = 4'b0001;  // 1
-    parameter espera_funcao  = 4'b0010;  // 2
-    parameter escolhe_funcao = 4'b0011;  // 3
-    parameter comparacao     = 4'b0100;  // 4
-    parameter proximo_char   = 4'b0101;  // 5
-    parameter espera_mem1    = 4'b0110;  // 6
-    parameter conta_tent     = 4'b0111;  // 7
-    parameter ganhou         = 4'b1000;  // 8
-    parameter perdeu         = 4'b1001;  // 9
-    parameter bloqueado      = 4'b1010;  // A
-    parameter grava          = 4'b1011;  // B
-    parameter proximo_end    = 4'b1100;  // C
-    parameter espera_mem2    = 4'b1101;  // D
+    parameter inicial          = 5'b00000;  // 0
+    parameter preparacao       = 5'b00001;  // 1
+    parameter espera_funcao    = 5'b00010;  // 2
+    parameter seleciona_funcao = 5'b00011;  // 3
+    parameter comparacao       = 5'b00100;  // 4
+    parameter proximo_char     = 5'b00101;  // 5
+    parameter espera_mem1      = 5'b00110;  // 6
+    parameter conta_tent       = 5'b00111;  // 7
+    parameter ganhou           = 5'b01000;  // 8
+    parameter perdeu           = 5'b01001;  // 9
+    parameter bloqueado        = 5'b01010;  // A
+    parameter grava            = 5'b01011;  // B
+    parameter proximo_end      = 5'b01100;  // C
+    parameter espera_mem2      = 5'b01101;  // D
+    parameter espera_serial    = 5'b01110;  // E
+    parameter grava_serial     = 5'b01111;  // F
+    parameter espera_serial_m  = 5'b10000;  // 10
+    parameter grava_serial_m   = 5'b10001;  // 11
+    parameter espera_serial_v  = 5'b10010;  // 12
+    parameter grava_serial_v   = 5'b10011;  // 13
 
     // Variaveis de estado
-    reg [3:0] Eatual, Eprox;
+    reg [4:0] Eatual, Eprox;
 
     // Memoria de estado
     always @(posedge clock or posedge reset) begin
@@ -69,13 +87,26 @@ module unidade_controle (
     always @* begin
         case (Eatual)
             inicial: Eprox = iniciar ? preparacao : inicial;
-            preparacao: Eprox = espera_funcao;
-            espera_funcao: Eprox = funcao_selecionada ? escolhe_funcao : espera_funcao;
-            escolhe_funcao: begin
-                if (funcao == 2'b01) Eprox = comparacao;
-                else if (funcao == 2'b10) Eprox = grava;
-                else Eprox = espera_funcao;
+            preparacao: Eprox = espera_serial;
+            espera_serial: Eprox = serial_finished ? grava_serial : espera_serial;
+            grava_serial: Eprox = seleciona_funcao;
+            seleciona_funcao: begin
+                if (opcode == "v") Eprox = espera_serial_v;
+                else if (opcode == "m") Eprox = espera_serial_m;
+                else Eprox = espera_serial;
             end
+            espera_serial_v: begin
+                if (serial_finished) Eprox = grava_serial_v;
+                else if (fim_time) Eprox = preparacao;
+                else Eprox = espera_serial_v;
+            end
+            grava_serial_v: Eprox = fim_gravacao ? espera_mem1 : espera_serial_v;
+            espera_serial_m: begin
+                if (serial_finished) Eprox = grava_serial_m;
+                else if (fim_time) Eprox = preparacao;
+                else Eprox = espera_serial_m;
+            end
+            grava_serial_m: Eprox = fim_gravacao ? espera_mem2 : espera_serial_m;
             comparacao: begin
                 if (igual == 0) Eprox = conta_tent;
                 else if (fim_verificacao) Eprox = ganhou;
@@ -101,32 +132,27 @@ module unidade_controle (
     // Logica de saida (maquina Moore)
     always @* begin
         zeraC = (Eatual == inicial || Eatual == preparacao) ? 1'b1 : 1'b0;
-        contaC = (Eatual == proximo_char || Eatual == proximo_end) ? 1'b1 : 1'b0;
         zeraT = (Eatual == inicial || Eatual == ganhou) ? 1'b1: 1'b0;
+        zeraS = (Eatual == inicial || Eatual == preparacao) ? 1'b1 : 1'b0;
+        zeraTo = (Eatual == inicial || Eatual == preparacao || Eatual == grava_serial_m || Eatual == grava_serial_v) ? 1'b1 : 1'b0;
+
+        contaC = (Eatual == proximo_char || Eatual == proximo_end) ? 1'b1 : 1'b0;
         contaT = (Eatual == conta_tent) ? 1'b1 : 1'b0;
+        contaS = (Eatual == grava_serial_v || Eatual == grava_serial_m) ? 1'b1 : 1'b0;
+        contaTo = (Eatual == espera_serial_v || Eatual == espera_serial_m) ? 1'b1 : 1'b0;
+
         escreve = (Eatual == grava) ? 1'b1 : 1'b0;
+        escreve_serial = (Eatual == grava_serial_v || Eatual == grava_serial_m) ? 1'b1 : 1'b0;
+        gravacao = (Eatual == grava_serial_v || Eatual == grava_serial_m) ? 1'b1 : 1'b0;
+
+        registraO = (Eatual == grava_serial) ? 1'b1 : 1'b0;
+        zeraO = (Eatual == inicial || Eatual == preparacao) ? 1'b1 : 1'b0;
+
         acertou = (Eatual == ganhou) ? 1'b1 : 1'b0;
         errou = (Eatual == perdeu) ? 1'b1 : 1'b0;
         db_bloqueado = (Eatual == bloqueado) ? 1'b1 : 1'b0;
 
-        // Saida de depuracao (estado)
-        case (Eatual)
-            inicial:       db_estado = 4'b0000;  // 0
-            preparacao:    db_estado = 4'b0001;  // 1
-            espera_funcao :db_estado = 4'b0010;  // 2
-            escolhe_funcao:db_estado = 4'b0011;  // 3
-            comparacao:    db_estado = 4'b0100;  // 4
-            proximo_char:  db_estado = 4'b0101;  // 5
-            espera_mem1:   db_estado = 4'b0110;  // 6
-            conta_tent:    db_estado = 4'b0111;  // 7
-            ganhou:        db_estado = 4'b1000;  // 8
-            perdeu:        db_estado = 4'b1001;  // 9
-            bloqueado:     db_estado = 4'b1010;  // A
-            grava:         db_estado = 4'b1011;  // B
-            proximo_end:   db_estado = 4'b1100;  // C
-            espera_mem2:   db_estado = 4'b1101;  // D
-            default:       db_estado = 4'b1111;  // F
-        endcase
+        db_estado = Eatual;
     end
 
 endmodule

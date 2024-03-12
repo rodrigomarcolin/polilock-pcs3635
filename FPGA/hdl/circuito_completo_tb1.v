@@ -17,7 +17,7 @@ module circuito_completo_tb1;
     reg        clock_in   = 1;
     reg        reset_in   = 0;
     reg        iniciar_in = 0;
-    reg  [1:0] funcao_in  = 2'b00;
+    reg        rxd_in     = 1;
 
     wire acertou_out;
     wire errou_out;
@@ -27,17 +27,34 @@ module circuito_completo_tb1;
     wire [6:0] db_mem2_out;
     wire [6:0] db_contagem_out;
 
-    parameter clockPeriod = 20; // in ns f = 50MHz
+    localparam BAUD_RATE = 9600;
+    localparam CLOCK_HZ = 50_000_000;
+    localparam STOP_BITS = 1;
+    localparam N_BITS = 8;
+
+    localparam clockPeriod = 20; // in ns f = 50MHz
+    // Bits enviados por nano segundo
+    localparam BITS_PNS = 1_000_000_000 * 1/BAUD_RATE;
+    // Periodo do sinal de clock em nano segundos
+    localparam CLK_PNS = 1_000_000_000 * 1/CLOCK_HZ;
+    // Numeros de ciclos de clock por bit de dados
+    localparam CLK_P_BIT = BITS_PNS / CLK_PNS;
 
     integer caso = 0;
 
     always #( (clockPeriod / 2)) clock_in = ~clock_in;
 
-    circuito_completo dut (
+    circuito_completo #(
+        .BAUD_RATE ( BAUD_RATE ),
+        .CLOCK_HZ  ( CLOCK_HZ ),
+        .STOP_BITS ( STOP_BITS ),
+        .N_BITS    ( N_BITS )
+    )
+    dut (
         .clock   ( clock_in ),
         .reset   ( reset_in ),
         .iniciar ( iniciar_in ),
-        .funcao  ( funcao_in ),
+        .rx      ( rxd_in ),
 
         .acertou ( acertou_out ),
         .errou   ( errou_out ),
@@ -47,10 +64,31 @@ module circuito_completo_tb1;
         .db_mem2 ( db_mem2_out ),
         .db_contagem ( db_contagem_out )
     );
-    // Com Veriloguer carregado na memoria principal e VerilogueA carregado na memoria serial
-    // inicialmente e realizada a verificacao, que deve falhar, em seguida, e ativada a funcao
-    // configuracao, que grava a senha da memoria serial na memoria principal, por fim e executado
-    // novamente a verificacao, desta vez dando corretamente.
+
+    // Verifica uma senha correta, verifica uma senha incorreta,
+    // carrega a senha incorreta, e verifica novamente.
+    integer i = 0;
+    task send_char(input [7:0] char);
+        begin
+            i = 0;
+            // manda start bit
+            @(negedge clock_in);
+            rxd_in = 0;
+            // espera uart receber start bit
+            #(CLK_P_BIT * clockPeriod);
+            for (; i < 8; i = i + 1) begin
+                @(negedge clock_in);
+                // envia bit
+                rxd_in = char[i];
+                // espera uart receber 
+                #(CLK_P_BIT * clockPeriod);
+            end
+            // manda stop bit
+            @(negedge clock_in);
+            rxd_in = 1;
+            #(CLK_P_BIT * clockPeriod);
+        end
+    endtask
 
     initial begin
         $display("Inicio da simulacao");
@@ -59,53 +97,145 @@ module circuito_completo_tb1;
         clock_in = 1;
         reset_in = 0;
         iniciar_in = 0;
-        funcao_in = 2'b00;
-        #clockPeriod;
-
+        
         caso = 1;
         @(negedge clock_in);
         reset_in = 1;
         #(clockPeriod);
         reset_in = 0;
-        #(10 * clockPeriod);
+        #( 5 * clockPeriod);
 
         caso = 2;
         @(negedge clock_in);
         iniciar_in = 1;
-        #(5 * clockPeriod);
+        #(clockPeriod);
         iniciar_in = 0;
-        #(10 * clockPeriod);
+        #( 5 * clockPeriod);
 
         caso = 3;
-        @(negedge clock_in);
-        funcao_in = 2'b01;
-        #(5 * clockPeriod );
-        funcao_in = 2'b00;
+        send_char("v");
+        #(10* clockPeriod);
+        send_char("V");
+        #(10* clockPeriod);
+        send_char("E");
+        #(10* clockPeriod);
+        send_char("R");
+        #(10* clockPeriod);
+        send_char("I");
+        #(10* clockPeriod);
+        send_char("L");
+        #(10* clockPeriod);
+        send_char("O");
+        #(10* clockPeriod);
+        send_char("G");
+        #(10* clockPeriod);
+        send_char("U");
+        #(10* clockPeriod);
+        send_char("E");
+        #(10* clockPeriod);
+        send_char("R");
+        #(10* clockPeriod);
 
-        #( 50 * clockPeriod);
+        #(50* clockPeriod);
 
         caso = 4;
         @(negedge clock_in);
         iniciar_in = 1;
-        #(5 * clockPeriod);
+        #(clockPeriod);
         iniciar_in = 0;
-        #(10 * clockPeriod);
+        #( 5 * clockPeriod);
 
         caso = 5;
-        @(negedge clock_in);
-        funcao_in = 2'b10;
-        #(5 * clockPeriod );
-        funcao_in = 2'b00;
+        send_char("v");
+        #(10* clockPeriod);
+        send_char("V");
+        #(10* clockPeriod);
+        send_char("E");
+        #(10* clockPeriod);
+        send_char("R");
+        #(10* clockPeriod);
+        send_char("I");
+        #(10* clockPeriod);
+        send_char("L");
+        #(10* clockPeriod);
+        send_char("O");
+        #(10* clockPeriod);
+        send_char("G");
+        #(10* clockPeriod);
+        send_char("U");
+        #(10* clockPeriod);
+        send_char("E");
+        #(10* clockPeriod);
+        send_char("A");
+        #(10* clockPeriod);
 
-        #( 50 * clockPeriod);
+        #(50* clockPeriod);
 
         caso = 6;
         @(negedge clock_in);
-        funcao_in = 2'b01;
-        #(5 * clockPeriod );
-        funcao_in = 2'b00;
+        iniciar_in = 1;
+        #(clockPeriod);
+        iniciar_in = 0;
+        #( 5 * clockPeriod);
 
-        #( 50 * clockPeriod);
+        caso = 7;
+        send_char("m");
+        #(10* clockPeriod);
+        send_char("V");
+        #(10* clockPeriod);
+        send_char("E");
+        #(10* clockPeriod);
+        send_char("R");
+        #(10* clockPeriod);
+        send_char("I");
+        #(10* clockPeriod);
+        send_char("L");
+        #(10* clockPeriod);
+        send_char("O");
+        #(10* clockPeriod);
+        send_char("G");
+        #(10* clockPeriod);
+        send_char("U");
+        #(10* clockPeriod);
+        send_char("E");
+        #(10* clockPeriod);
+        send_char("A");
+        #(10* clockPeriod);
+
+        #(50* clockPeriod);
+
+        caso = 8;
+        @(negedge clock_in);
+        iniciar_in = 1;
+        #(clockPeriod);
+        iniciar_in = 0;
+        #( 5 * clockPeriod);
+
+        caso = 9;
+        send_char("v");
+        #(10* clockPeriod);
+        send_char("V");
+        #(10* clockPeriod);
+        send_char("E");
+        #(10* clockPeriod);
+        send_char("R");
+        #(10* clockPeriod);
+        send_char("I");
+        #(10* clockPeriod);
+        send_char("L");
+        #(10* clockPeriod);
+        send_char("O");
+        #(10* clockPeriod);
+        send_char("G");
+        #(10* clockPeriod);
+        send_char("U");
+        #(10* clockPeriod);
+        send_char("E");
+        #(10* clockPeriod);
+        send_char("A");
+        #(10* clockPeriod);
+
+        #(50* clockPeriod);
 
         $display("fim da simulacao");
         $stop;

@@ -51,6 +51,7 @@ wire counter_finished = cycle_counter == CLK_P_BIT;
 wire counter_half     = cycle_counter == CLK_P_BIT/2;
 // a mensagem foi recebida se todos os bits chegaram
 wire receive_finished = data_counter == N_BITS;
+// "I used to think my life was a tragedy, but now I realize it's a comedy." — Joker
 
 assign finished = current_state == FINISH && next_state == IDLE;
 
