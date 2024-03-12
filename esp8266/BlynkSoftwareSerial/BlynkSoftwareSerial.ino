@@ -2,9 +2,15 @@
 #include <SoftwareSerial.h>
 #include <BlynkSimpleEsp8266.h>
 
+#define BUTTON_PRESSED_VALUE 255
+
 #define verifyLedPin D2
 #define modifyLedPin D3
 
+#define OP_TO_PASS_DELAY 200
+#define LED_BLINK_DELAY 500
+
+#define BAUD_RATE 9600
 #define RX_PIN D5
 #define TX_PIN D6
 
@@ -23,11 +29,13 @@ void setupLeds();
 
 void setup()
 {
-  softSerial.begin(9600);
-  Serial.begin(9600);
+  softSerial.begin(BAUD_RATE);
+  Serial.begin(BAUD_RATE);
+
   pinMode(TX_PIN, output);
-  Blynk.begin(BLYNK_AUTH_TOKEN, WIFI_SSID, WIFI_PASS, "blynk.cloud", 80);
   setupLeds();
+
+  Blynk.begin(BLYNK_AUTH_TOKEN, WIFI_SSID, WIFI_PASS, "blynk.cloud", 80);
 }
 
 void loop()
@@ -38,21 +46,21 @@ void loop()
 void modifyPassword()
 {
   softSerial.write(MODIFY_OPCODE);
-  delay(200);
+  delay(OP_TO_PASS_DELAY);
   softSerial.write(passwordToModify);
 }
 
 void verifyPassword()
 {
   softSerial.write(VERIFY_OPCODE);
-  delay(200);
+  delay(OP_TO_PASS_DELAY);
   softSerial.write(passwordToVerify);
 }
 
 void blinkLed(int pin)
 {
   digitalWrite(pin, HIGH);
-  delay(500);
+  delay(LED_BLINK_DELAY);
   digitalWrite(pin, LOW);
 }
 
@@ -64,8 +72,8 @@ void setupLeds()
 
 BLYNK_WRITE(V0)
 {
-  int verifyFlag = param.asInt();
-  if (verifyFlag == 255)
+  int verifyButtonValue = param.asInt();
+  if (verifyButtonValue == BUTTON_PRESSED_VALUE)
   {
     verifyPassword();
     blinkLed(verifyLedPin);
@@ -74,8 +82,8 @@ BLYNK_WRITE(V0)
 
 BLYNK_WRITE(V1)
 {
-  int modifyFlag = param.asInt();
-  if (modifyFlag == 255)
+  int modifyButtonValue = param.asInt();
+  if (modifyButtonValue == BUTTON_PRESSED_VALUE)
   {
     modifyPassword();
     blinkLed(modifyLedPin);

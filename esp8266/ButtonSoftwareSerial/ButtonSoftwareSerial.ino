@@ -2,7 +2,9 @@
 
 #define verifyButtonPin D2
 #define modifyButtonPin D3
+
 #define DEBOUNCE_DELAY 800
+#define OP_TO_PASS_DELAY 200
 
 #define RX_PIN 5
 #define TX_PIN 6
@@ -91,13 +93,13 @@ bool isDebounceTimePassed(Button &button)
 void modifyPassword()
 {
   softSerial.write(MODIFY_OPCODE);
-  delay(200);
+  delay(OP_TO_PASS_DELAY);
   softSerial.write(passwordToModify);
 }
 
 void verifyPassword()
 {
   softSerial.write(VERIFY_OPCODE);
-  delay(200);
+  delay(OP_TO_PASS_DELAY);
   softSerial.write(passwordToVerify);
 }
