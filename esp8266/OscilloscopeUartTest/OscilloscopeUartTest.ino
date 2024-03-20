@@ -6,14 +6,14 @@
 
 SoftwareSerial softSerial(RX_PIN, TX_PIN);
 
-char CHAR_TO_WRITE = 'v';
-char STRING_TO_WRITE = "abc";
+char CHAR_TO_WRITE = 'w';
+char STRING_TO_WRITE[] = "abc";
 
 void setup()
 {
   softSerial.begin(BAUD_RATE);
   Serial.begin(BAUD_RATE);
-  pinMode(TX_PIN, output);
+  pinMode(TX_PIN, OUTPUT);
 }
 
 void loop()
