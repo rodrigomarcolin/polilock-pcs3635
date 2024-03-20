@@ -5,7 +5,7 @@ const int potPin = A0;
 Servo myServo;
 
 void setup() {
-  myServo.attach(9);
+  myServo.attach(9, 500, 2400);
 }
 
 void loop() {
