@@ -6,6 +6,7 @@
 #include <FS.h>
 #include <LittleFS.h>
 #include <CertStoreBearSSL.h>
+#include <Servo.h>
 
 #define LED_PIN D3
 // Update these with values suitable for your network.
@@ -18,6 +19,7 @@ const char* mqtt_server = "00e19446463f4de4a0733527b72742c7.s1.eu.hivemq.cloud";
 // are present.
 BearSSL::CertStore certStore;
 
+Servo servo;
 WiFiClientSecure espClient;
 PubSubClient client(espClient);
 unsigned long lastMsg = 0;
@@ -25,6 +27,16 @@ unsigned long lastMsg = 0;
 char msg[MSG_BUFFER_SIZE];
 int value = 0;
 
+void abreTranca() {
+  servo.write(180);
+  delay(1000);
+}
+
+void fechaTranca() {
+  servo.write(0);
+  delay(1000);
+}
+  
 void setup_wifi() {
   delay(10);
   // We start by connecting to a WiFi network
@@ -83,11 +95,11 @@ void callback(char* topic, byte* payload, unsigned int length) {
     int value = message.toInt();
     if (value > 127)
     {
-        digitalWrite(LED_PIN, HIGH); // Turn on the LED
+        abreTranca();
     }
     else
     {
-        digitalWrite(LED_PIN, LOW);
+        fechaTranca();
     }
 }
 
@@ -99,7 +111,7 @@ void reconnect() {
     String clientId = "ESP8266Client -123123";
     // Attempt to connect
     // Insert your password
-    if (client.connect(clientId.c_str(), MQTT_HOST, MQTT_PASS)) {
+    if (client.connect(clientId.c_str(), "PoliLock", "DAGames23")) {
       Serial.println("connected");
       // Once connected, publish an announcement…
       client.publish("testTopic", "hello world");
@@ -116,8 +128,11 @@ void reconnect() {
 }
 
 
+
 void setup() {
   delay(500);
+  servo.attach(D6, 500, 2400);
+  
   // When opening the Serial Monitor, select 9600 Baud
   Serial.begin(9600);
   delay(500);
@@ -144,7 +159,7 @@ void setup() {
 
   client = *(new PubSubClient(*bear));
 
-  client.setServer(mqtt_server, MQTT_PORT);
+  client.setServer(mqtt_server, 8883);
   client.setCallback(callback);
 }
 
