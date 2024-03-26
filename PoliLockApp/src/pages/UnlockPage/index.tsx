@@ -13,8 +13,11 @@ import { lockOpen } from "ionicons/icons";
 
 import UnlockedModal from "./UnlockedModal";
 import BlockedModal from "./BlockedModal";
+import { useMqtt } from "../../contexts/MqttContext";
 
 const UnlockPage: React.FC = () => {
+  const { publish } = useMqtt();
+
   const [presentUnlockedModal, dismissUnlockedMOdal] = useIonModal(
     UnlockedModal,
     {
@@ -26,14 +29,18 @@ const UnlockPage: React.FC = () => {
     onDismiss: () => dismissBlockedModal(),
   });
 
+  const verifySenhaTopic = "dagames/armarios/1/verify";
+
   const onSubmit: SubmitHandler<FieldValues> = (data) => {
     console.log(data.senha);
 
-    if (data.senha == "1234567890") {
-      presentUnlockedModal();
-    } else {
-      presentBlockedModal();
-    }
+    publish(verifySenhaTopic, data.senha);
+
+    // if (data.senha == "1234567890") {
+    //   presentUnlockedModal();
+    // } else {
+    //   presentBlockedModal();
+    // }
   };
 
   return (

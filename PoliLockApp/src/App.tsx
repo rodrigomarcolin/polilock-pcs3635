@@ -10,8 +10,9 @@ import {
   setupIonicReact,
 } from "@ionic/react";
 import { IonReactRouter } from "@ionic/react-router";
-import { lockOpen, construct, bug, bugOutline, bugSharp } from "ionicons/icons";
+import { lockOpen, construct, bug } from "ionicons/icons";
 
+import { MqttProvider } from "./contexts/MqttContext";
 import UnlockPage from "./pages/UnlockPage";
 import ManagePage from "./pages/ManagePage";
 import DebugPage from "./pages/DebugPage";
@@ -42,18 +43,20 @@ const App: React.FC = () => (
     <IonReactRouter>
       <IonTabs>
         <IonRouterOutlet>
-          <Route exact path="/unlock">
-            <UnlockPage />
-          </Route>
-          <Route exact path="/manage">
-            <ManagePage />
-          </Route>
-          <Route exact path="/debug">
-            <DebugPage />
-          </Route>
-          <Route exact path="/">
-            <Redirect to="/unlock" />
-          </Route>
+          <MqttProvider>
+            <Route exact path="/unlock">
+              <UnlockPage />
+            </Route>
+            <Route exact path="/manage">
+              <ManagePage />
+            </Route>
+            <Route exact path="/debug">
+              <DebugPage />
+            </Route>
+            <Route exact path="/">
+              <Redirect to="/unlock" />
+            </Route>
+          </MqttProvider>
         </IonRouterOutlet>
         <IonTabBar slot="bottom">
           <IonTabButton tab="unlock" href="/unlock">
