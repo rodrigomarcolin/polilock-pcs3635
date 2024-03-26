@@ -72,6 +72,14 @@ private:
     unsigned long lastDebounceTime;
     int lastState;
 
+    bool isDebounceTimePassed() {
+      return (millis() - lastDebounceTime) > debounceDelay;
+    }
+
+    void updateLastDebounceTime() {
+      lastDebounceTime = millis();
+    }
+
 public:
     PinStateNotifier(int _pin, String _topic, String _truthyMessage, String _falsyMessage, unsigned long _debounceDelay = 200)
     {
@@ -106,17 +114,14 @@ public:
     void update()
     {
         int currentState = digitalRead(pin);
-        Serial.println("Entering update state");
+        Serial.println(currentState);
 
-        if (currentState != lastState)
-        {
-            lastDebounceTime = millis();
-        }
-
-        if ((millis() - lastDebounceTime) > debounceDelay)
-        {
+        if (isDebounceTimePassed())
+        {            
             if (currentState != lastState)
             {
+                updateLastDebounceTime();
+
                 if (currentState == HIGH)
                 {
                     Serial.print("Sending truthy message: ");
