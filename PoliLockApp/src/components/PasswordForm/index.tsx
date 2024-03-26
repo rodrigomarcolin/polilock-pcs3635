@@ -43,7 +43,7 @@ const PasswordForm: React.FC<PasswordFormProps> = ({
       />
       <div>
         <IonButton
-          onClick={() => console.log(errors)}
+          onClick={() => console.log("Erros:", errors)}
           className="ion-margin-top"
           type="submit"
         >

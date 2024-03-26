@@ -12,7 +12,7 @@ import { create } from "ionicons/icons";
 const ManagePage: React.FC = () => {
   const onSubmit: SubmitHandler<FieldValues> = (data) => {
     console.log("testando submit");
-    console.log(data);
+    console.log(data.senha);
   };
 
   return (

@@ -5,17 +5,35 @@ import {
   IonTitle,
   IonToolbar,
   IonButton,
+  useIonModal,
 } from "@ionic/react";
 import { SubmitHandler, FieldValues } from "react-hook-form";
 import PasswordForm from "../../components/PasswordForm";
 import { lockOpen } from "ionicons/icons";
 
-import { useRef } from "react";
+import UnlockedModal from "./UnlockedModal";
+import BlockedModal from "./BlockedModal";
 
 const UnlockPage: React.FC = () => {
+  const [presentUnlockedModal, dismissUnlockedMOdal] = useIonModal(
+    UnlockedModal,
+    {
+      onDismiss: () => dismissUnlockedMOdal(),
+    }
+  );
+
+  const [presentBlockedModal, dismissBlockedModal] = useIonModal(BlockedModal, {
+    onDismiss: () => dismissBlockedModal(),
+  });
+
   const onSubmit: SubmitHandler<FieldValues> = (data) => {
-    console.log("testando submit");
-    console.log(data);
+    console.log(data.senha);
+
+    if (data.senha == "1234567890") {
+      presentUnlockedModal();
+    } else {
+      presentBlockedModal();
+    }
   };
 
   return (
@@ -31,10 +49,6 @@ const UnlockPage: React.FC = () => {
             <IonTitle size="large">Destrancar Armário</IonTitle>
           </IonToolbar>
         </IonHeader>
-
-        <IonButton id="open-custom-dialog" expand="block">
-          Open Custom Dialog
-        </IonButton>
 
         <PasswordForm
           onSubmit={onSubmit}
