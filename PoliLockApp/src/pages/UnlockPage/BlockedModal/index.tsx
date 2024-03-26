@@ -36,7 +36,7 @@ const BlockedModal = ({ onDismiss }: { onDismiss: () => void }) => {
 
           <Lottie options={blockedAnimationOptions} height={200} width={200} />
 
-          <IonButton onClick={onDismiss} expand="block" color="success">
+          <IonButton onClick={onDismiss} expand="block" color="danger">
             Voltar
           </IonButton>
         </div>
