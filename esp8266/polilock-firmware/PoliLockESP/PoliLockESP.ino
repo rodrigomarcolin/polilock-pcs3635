@@ -63,11 +63,12 @@ void reconnect();
 
 class PinStateNotifier
 {
-private:
-    int pin;
+protected:
     String topic;
     String truthyMessage;
     String falsyMessage;
+private:
+    int pin;
     unsigned long debounceDelay;
     unsigned long lastDebounceTime;
     int lastState;
@@ -96,6 +97,9 @@ public:
     {
         // Default implementation for the high state
         Serial.print("Sending truthy message: ");
+        if (client.connected()) {
+          client.publish(topic.c_str(), truthyMessage.c_str());
+        }
         Serial.println(truthyMessage);
     }
 
@@ -103,6 +107,9 @@ public:
     {
         // Default implementation for the low state
         Serial.print("Sending falsy message: ");
+        if (client.connected()) {
+          client.publish(topic.c_str(), falsyMessage.c_str());
+        }
         Serial.println(falsyMessage);
     }
 
@@ -114,8 +121,6 @@ public:
     void update()
     {
         int currentState = digitalRead(pin);
-        Serial.println(currentState);
-
         if (isDebounceTimePassed())
         {            
             if (currentState != lastState)
@@ -151,12 +156,18 @@ public:
     void onTrueToFalse() override
     {
         Serial.println("Unlocked!!");
+        if (client.connected()) {
+          client.publish(topic.c_str(), falsyMessage.c_str());
+        }
         openLock();
     }
 
     void onFalseToTrue() override
     {
         Serial.println("Locked!!");
+        if (client.connected()) {
+          client.publish(topic.c_str(), truthyMessage.c_str());
+        }
         closeLock();
     }
 };
@@ -327,6 +338,7 @@ void verifyPassword(const String &password)
 {
     if (digitalRead(IS_BLOCKED_PIN) == HIGH)
     {
+        Serial.println("Couldn't verify password. System is blocked.");
         return;
     }
     Serial.println("verifying password!");
