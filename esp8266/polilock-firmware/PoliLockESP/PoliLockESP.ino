@@ -155,20 +155,21 @@ public:
 
     void onTrueToFalse() override
     {
-        Serial.println("Unlocked!!");
-        if (client.connected()) {
-          client.publish(topic.c_str(), falsyMessage.c_str());
-        }
-        openLock();
-    }
-
-    void onFalseToTrue() override
-    {
         Serial.println("Locked!!");
         if (client.connected()) {
           client.publish(topic.c_str(), truthyMessage.c_str());
         }
         closeLock();
+    }
+
+    void onFalseToTrue() override
+    {
+      Serial.println("Unlocked!!");
+        if (client.connected()) {
+          client.publish(topic.c_str(), falsyMessage.c_str());
+        }
+        openLock();
+        
     }
 };
 
@@ -180,6 +181,7 @@ void setup()
     delay(500);
     servo.attach(SERVO_PIN, 500, 2400);
 
+    softSerial.begin(BAUD_RATE);
     Serial.begin(BAUD_RATE);
     delay(500);
 
