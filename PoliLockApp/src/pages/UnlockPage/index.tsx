@@ -4,32 +4,15 @@ import {
   IonPage,
   IonTitle,
   IonToolbar,
-  IonText,
-  IonItem,
   IonButton,
-  IonLabel,
-  IonInput,
 } from "@ionic/react";
-import { ErrorMessage } from "@hookform/error-message";
-import {
-  useForm,
-  Controller,
-  SubmitHandler,
-  FieldValues,
-} from "react-hook-form";
+import { SubmitHandler, FieldValues } from "react-hook-form";
+import PasswordForm from "../../components/PasswordForm";
+import { lockOpen } from "ionicons/icons";
 
-interface FormData {
-  password: string;
-}
+import { useRef } from "react";
 
 const UnlockPage: React.FC = () => {
-  const {
-    control,
-    handleSubmit,
-    register,
-    formState: { errors },
-  } = useForm();
-
   const onSubmit: SubmitHandler<FieldValues> = (data) => {
     console.log("testando submit");
     console.log(data);
@@ -39,47 +22,25 @@ const UnlockPage: React.FC = () => {
     <IonPage>
       <IonHeader>
         <IonToolbar>
-          <IonTitle>Desbloquear Armário</IonTitle>
+          <IonTitle>Destrancar Armário</IonTitle>
         </IonToolbar>
       </IonHeader>
       <IonContent className={"ion-padding ion-margin"} fullscreen>
         <IonHeader collapse="condense">
           <IonToolbar>
-            <IonTitle size="large">Desbloquear Armário</IonTitle>
+            <IonTitle size="large">Destrancar Armário</IonTitle>
           </IonToolbar>
         </IonHeader>
 
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <IonItem>
-            <IonInput
-              label="Insira sua Senha"
-              labelPlacement="floating"
-              color={errors.senha ? "danger" : ""}
-              type="password"
-              {...register("senha", {
-                required: "Insira uma senha!",
-                pattern: {
-                  value: /^[\x20-\x7E]{10}$/,
-                  message: "A senha deve ter exatamente 10 caracteres ASCII",
-                },
-              })}
-            />
-          </IonItem>
-          <ErrorMessage
-            errors={errors}
-            name="senha"
-            as={<div style={{ color: "red" }} />}
-          />
-          <div>
-            <IonButton
-              onClick={() => console.log(errors)}
-              className="ion-margin-top"
-              type="submit"
-            >
-              Desbloquear
-            </IonButton>
-          </div>
-        </form>
+        <IonButton id="open-custom-dialog" expand="block">
+          Open Custom Dialog
+        </IonButton>
+
+        <PasswordForm
+          onSubmit={onSubmit}
+          submitBtnText="Destrancar"
+          btnIcon={lockOpen}
+        />
       </IonContent>
     </IonPage>
   );

@@ -10,9 +10,11 @@ import {
   setupIonicReact,
 } from "@ionic/react";
 import { IonReactRouter } from "@ionic/react-router";
-import { lockOpen, construct } from "ionicons/icons";
+import { lockOpen, construct, bug, bugOutline, bugSharp } from "ionicons/icons";
+
 import UnlockPage from "./pages/UnlockPage";
 import ManagePage from "./pages/ManagePage";
+import DebugPage from "./pages/DebugPage";
 
 /* Core CSS required for Ionic components to work properly */
 import "@ionic/react/css/core.css";
@@ -46,6 +48,9 @@ const App: React.FC = () => (
           <Route exact path="/manage">
             <ManagePage />
           </Route>
+          <Route exact path="/debug">
+            <DebugPage />
+          </Route>
           <Route exact path="/">
             <Redirect to="/unlock" />
           </Route>
@@ -53,11 +58,15 @@ const App: React.FC = () => (
         <IonTabBar slot="bottom">
           <IonTabButton tab="unlock" href="/unlock">
             <IonIcon aria-hidden="true" icon={lockOpen} />
-            <IonLabel>Desbloquear</IonLabel>
+            <IonLabel>Destrancar</IonLabel>
           </IonTabButton>
           <IonTabButton tab="manage" href="/manage">
             <IonIcon aria-hidden="true" icon={construct} />
             <IonLabel>Gerenciar</IonLabel>
+          </IonTabButton>
+          <IonTabButton tab="debug" href="/debug">
+            <IonIcon aria-hidden="true" icon={bug} />
+            <IonLabel>Debug</IonLabel>
           </IonTabButton>
         </IonTabBar>
       </IonTabs>
