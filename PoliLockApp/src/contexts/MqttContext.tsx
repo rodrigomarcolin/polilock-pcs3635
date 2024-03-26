@@ -17,15 +17,15 @@ export const MqttProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const [client, setClient] = useState<mqtt.MqttClient | null>(null);
-  const port = process.env.REACT_APP_MQTT_PORT
-    ? parseInt(process.env.REACT_APP_MQTT_PORT)
+  const port = import.meta.env.REACT_APP_MQTT_PORT
+    ? parseInt(import.meta.env.REACT_APP_MQTT_PORT)
     : undefined;
 
   useEffect(() => {
-    const url = process.env.REACT_APP_MQTT_BROKER_URL;
+    const url = import.meta.env.REACT_APP_MQTT_BROKER_URL;
     const options: IClientOptions = {
-      username: process.env.REACT_APP_MQTT_USERNAME,
-      password: process.env.REACT_APP_MQTT_PASSWORD,
+      username: import.meta.env.REACT_APP_MQTT_USERNAME,
+      password: import.meta.env.REACT_APP_MQTT_PASSWORD,
       port: port,
     };
 
