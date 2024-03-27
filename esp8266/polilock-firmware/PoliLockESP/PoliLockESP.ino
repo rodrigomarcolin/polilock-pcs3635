@@ -9,31 +9,56 @@
 #include <CertStoreBearSSL.h>
 #include <Servo.h>
 
-#define RX_PIN D6
-#define TX_PIN D7
+#define RESET_PIN D0
+#define INICIAR_PIN D1
+#define TX_PIN D2
+#define IS_BLOCKED_PIN D3
+#define IS_LOCKED_PIN D4
+#define SERVO_PIN D5
+#define GREEN_LED_PIN D6
+#define RED_LED_PIN D7
+#define BUZZER_PIN D8
 
-#define SERVO_PIN D2
+#define RX_PIN 255
+
 #define SERVO_LOCKED_ANGLE 180
 #define SERVO_UNLOCKED_ANGLE 0
 
-#define IS_LOCKED_PIN D4
 #define LOCKED_TOPIC "dagames/armarios/1/locked"
 #define LOCKED_MESSAGE "locked"
 #define UNLOCKED_MESSAGE "unlocked"
 
-#define IS_BLOCKED_PIN D3
 #define BLOCKED_TOPIC "dagames/armarios/1/blocked"
 #define BLOCKED_MESSAGE "blocked"
 #define UNBLOCKED_MESSAGE "unblocked"
 
+#define RED_LED_PIN D8
 #define VERIFY_TOPIC "dagames/armarios/1/verify"
 #define VERIFY_OPCODE 'v'
 
 #define MODIFY_TOPIC "dagames/armarios/1/modify"
 #define MODIFY_OPCODE 'm'
 
+#define INICIA_TOPIC "dagames/armarios/1/start"
+#define RESET_TOPIC "dagames/armarios/1/reset"
+
+#define INICIAR_TOPIC "da"
 #define OP_TO_PASS_DELAY 200
 
+#define BUZZER_LOCK_TONE 480
+#define BUZZER_LOCK_REPEAT 2
+#define BUZZER_LOCK_DELAY 1000
+
+#define BUZZER_UNLOCK_TONE 1046
+#define BUZZER_UNLOCK_REPEAT 2
+#define BUZZER_UNLOCK_DELAY 500
+
+#define BUZZER_BLOCK_TONE 440
+#define BUZZER_BLOCK_REPEAT 4
+#define BUZZER_BLOCK_DELAY 1000
+
+
+#define LOGS_TOPIC "dagames/armarios/1/logs"
 #define BAUD_RATE 9600
 
 const char *ssid = WIFI_SSID;
@@ -58,8 +83,14 @@ void verifyPassword();
 void modifyPassword();
 void setup_wifi();
 void setDateTime();
+void mandaIniciar();
+void mandaResetar();
 void callback(char *topic, byte *payload, unsigned int length);
 void reconnect();
+void apitaDestrancar();
+void apitaTrancar();
+void apitaBloquear();
+void logger(String log);
 
 class PinStateNotifier
 {
@@ -101,6 +132,7 @@ public:
           client.publish(topic.c_str(), truthyMessage.c_str());
         }
         Serial.println(truthyMessage);
+        logger("Mudança no estado! Armário " + truthyMessage);
     }
 
     virtual void onTrueToFalse()
@@ -111,6 +143,7 @@ public:
           client.publish(topic.c_str(), falsyMessage.c_str());
         }
         Serial.println(falsyMessage);
+        logger("Mudança no estado! Armário " + falsyMessage);   
     }
 
     void begin()
@@ -159,7 +192,11 @@ public:
         if (client.connected()) {
           client.publish(topic.c_str(), truthyMessage.c_str());
         }
+        digitalWrite(RED_LED_PIN, HIGH);
+        digitalWrite(GREEN_LED_PIN, LOW);
+        apitaDestrancar();
         closeLock();
+        logger("Trancando o armário!");
     }
 
     void onFalseToTrue() override
@@ -168,13 +205,20 @@ public:
         if (client.connected()) {
           client.publish(topic.c_str(), falsyMessage.c_str());
         }
+        digitalWrite(RED_LED_PIN, LOW);
+        digitalWrite(GREEN_LED_PIN, HIGH);
+        apitaDestrancar();
         openLock();
-        
+        logger("Senha correta! Destrancando...");
     }
 };
 
 LockedPinStateNotifier lockedPinStateNotifier(IS_LOCKED_PIN, LOCKED_TOPIC, LOCKED_MESSAGE, UNLOCKED_MESSAGE);
 PinStateNotifier blockedPinStateNotifier(IS_BLOCKED_PIN, BLOCKED_TOPIC, BLOCKED_MESSAGE, UNBLOCKED_MESSAGE);
+
+void logger(String log) {
+    client.publish(LOGS_TOPIC, log.c_str());
+}
 
 void setup()
 {
@@ -191,6 +235,12 @@ void setup()
     LittleFS.begin();
     setup_wifi();
     setDateTime();
+
+    pinMode(GREEN_LED_PIN, OUTPUT);
+    pinMode(RED_LED_PIN, OUTPUT);
+    pinMode(BUZZER_PIN, OUTPUT);
+    pinMode(INICIAR_PIN, OUTPUT);
+    pinMode(RESET_PIN, OUTPUT);
 
     int numCerts = certStore.initCertStore(LittleFS, PSTR("/certs.idx"), PSTR("/certs.ar"));
     Serial.printf("Number of CA certs read: %d\n", numCerts);
@@ -222,8 +272,6 @@ void loop()
 
 void setDateTime()
 {
-    // You can use your own timezone, but the exact time is not used at all.
-    // Only the date is needed for validating the certificates.
     configTime(TZ_Europe_Berlin, "pool.ntp.org", "time.nist.gov");
 
     Serial.print("Waiting for NTP time sync: ");
@@ -285,9 +333,9 @@ void callback(char *topic, byte *payload, unsigned int length)
     {
         password += (char)payload[i];
     }
-    Serial.print("Password received on topic: ");
+    Serial.print("Message received on topic: ");
     Serial.println(topic);
-    Serial.print("Password: ");
+    Serial.print("Message: ");
     Serial.println(password);
 
     if (strcmp(topic, VERIFY_TOPIC) == 0)
@@ -297,6 +345,15 @@ void callback(char *topic, byte *payload, unsigned int length)
     else if (strcmp(topic, MODIFY_TOPIC) == 0)
     {
         modifyPassword(password);
+    }
+    else if (strcmp(topic, INICIA_TOPIC) == 0)
+    {
+
+        mandaIniciar();
+    }
+    else if (strcmp(topic, RESET_TOPIC  ) == 0)
+    {
+        mandaResetar();
     }
 }
 
@@ -312,9 +369,9 @@ void reconnect()
         if (client.connect(clientId.c_str(), MQTT_USER, MQTT_PASS))
         {
             Serial.println("connected");
-            client.publish("testTopic", "hello world");
-            client.subscribe("dagames/led");
             client.subscribe(MODIFY_TOPIC);
+            client.subscribe(INICIA_TOPIC);
+            client.subscribe(RESET_TOPIC);
             client.subscribe(VERIFY_TOPIC);
         }
         else
@@ -322,7 +379,6 @@ void reconnect()
             Serial.print("failed, rc = ");
             Serial.print(client.state());
             Serial.println(" try again in 5 seconds");
-            // Wait 5 seconds before retrying
             delay(5000);
         }
     }
@@ -331,6 +387,7 @@ void reconnect()
 void modifyPassword(const String &password)
 {
     Serial.println("modifying password!");
+    logger("Senha recebida! Modificando para a senha " + password);
     softSerial.write(MODIFY_OPCODE);
     delay(OP_TO_PASS_DELAY);
     softSerial.write(password.c_str(), password.length());
@@ -344,7 +401,49 @@ void verifyPassword(const String &password)
         return;
     }
     Serial.println("verifying password!");
+    logger("Senha recebida! Verificando a senha " + password );
     softSerial.write(VERIFY_OPCODE);
     delay(OP_TO_PASS_DELAY);
     softSerial.write(password.c_str(), password.length());
+}
+
+void mandaIniciar() {
+    logger("Mandando sinal de início...");
+    digitalWrite(INICIAR_PIN, HIGH);
+    delay(50);
+    digitalWrite(INICIAR_PIN, LOW);
+}
+
+void mandaResetar() {
+    logger("Resetando o sistema...");
+    digitalWrite(RESET_PIN, HIGH);
+    delay(50);
+    digitalWrite(RESET_PIN, LOW);
+}
+
+void apitaTrancar() {
+    for (int i = 0; i < BUZZER_LOCK_REPEAT; i++) {
+        tone(BUZZER_PIN, BUZZER_LOCK_TONE);
+        delay(BUZZER_LOCK_DELAY);
+        noTone(BUZZER_PIN);
+        delay(200);
+    }
+}
+
+void apitaDestrancar() {
+    for (int i = 0; i < BUZZER_UNLOCK_REPEAT; i++) {
+        tone(BUZZER_PIN, BUZZER_UNLOCK_TONE);
+        delay(BUZZER_UNLOCK_DELAY);
+        noTone(BUZZER_PIN);
+        delay(200);
+    }
+}
+
+void apitaBloquear() {
+    for (int i = 0; i < BUZZER_BLOCK_REPEAT; i++) {
+        tone(BUZZER_PIN, BUZZER_BLOCK_TONE);
+        delay(BUZZER_BLOCK_DELAY);
+        noTone(BUZZER_PIN);
+        delay(200);
+    }
 }
