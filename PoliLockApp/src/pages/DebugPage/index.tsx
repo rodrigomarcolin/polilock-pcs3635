@@ -14,7 +14,7 @@ import { cafe } from "ionicons/icons";
 import { useMqtt } from "../../contexts/MqttContext";
 
 const DebugPage: React.FC = () => {
-  const { client } = useMqtt();
+  const { isConnected } = useMqtt();
 
   return (
     <IonPage>
@@ -35,7 +35,7 @@ const DebugPage: React.FC = () => {
             <IonIcon icon={cafe} className={styles.textIcon} />
           </IonTitle>
         </IonToolbar>
-        <ConnectionIndicator isConnected={client?.connected} />
+        <ConnectionIndicator isConnected={isConnected} />
       </IonContent>
     </IonPage>
   );

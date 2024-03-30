@@ -6,13 +6,23 @@ import {
   IonToolbar,
 } from "@ionic/react";
 import { SubmitHandler, FieldValues } from "react-hook-form";
-import PasswordForm from "../../components/PasswordForm";
-import { create } from "ionicons/icons";
+import {  StatusToRepresentationMap } from "../../types";
+import ModifyPasswordForm from "./ModifyPasswordForm";
+
+import { closeCircle } from "ionicons/icons";
 
 const ManagePage: React.FC = () => {
   const onSubmit: SubmitHandler<FieldValues> = (data) => {
     console.log("testando submit");
     console.log(data.senha);
+  };
+
+  const blockedStatusRep: StatusToRepresentationMap = {
+    blocked: {
+      color: "danger",
+      name: "Bloqueado",
+      icon: closeCircle,
+    },
   };
 
   return (
@@ -29,11 +39,7 @@ const ManagePage: React.FC = () => {
           </IonToolbar>
         </IonHeader>
 
-        <PasswordForm
-          onSubmit={onSubmit}
-          submitBtnText="Mudar Senha"
-          btnIcon={create}
-        />
+        <ModifyPasswordForm/>
       </IonContent>
     </IonPage>
   );

@@ -14,9 +14,11 @@ import { lockOpen } from "ionicons/icons";
 import UnlockedModal from "./UnlockedModal";
 import BlockedModal from "./BlockedModal";
 import { useMqtt } from "../../contexts/MqttContext";
+import VerifyPasswordForm from "./VerifyPasswordForm";
+import { useEffect } from "react";
 
 const UnlockPage: React.FC = () => {
-  const { publish } = useMqtt();
+  const { client } = useMqtt();
 
   const [presentUnlockedModal, dismissUnlockedMOdal] = useIonModal(
     UnlockedModal,
@@ -29,19 +31,12 @@ const UnlockPage: React.FC = () => {
     onDismiss: () => dismissBlockedModal(),
   });
 
-  const verifySenhaTopic = "dagames/armarios/1/verify";
-
-  const onSubmit: SubmitHandler<FieldValues> = (data) => {
-    console.log(data.senha);
-
-    publish(verifySenhaTopic, data.senha);
-
-    // if (data.senha == "1234567890") {
-    //   presentUnlockedModal();
-    // } else {
-    //   presentBlockedModal();
-    // }
-  };
+  useEffect(() => {
+    client?.on("message", (message) => {
+      console.log("received message");
+      console.log(message);
+    });
+  }, []);
 
   return (
     <IonPage>
@@ -57,11 +52,7 @@ const UnlockPage: React.FC = () => {
           </IonToolbar>
         </IonHeader>
 
-        <PasswordForm
-          onSubmit={onSubmit}
-          submitBtnText="Destrancar"
-          btnIcon={lockOpen}
-        />
+        <VerifyPasswordForm />
       </IonContent>
     </IonPage>
   );

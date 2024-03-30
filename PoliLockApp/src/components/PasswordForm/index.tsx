@@ -1,17 +1,20 @@
 import { IonItem, IonButton, IonInput, IonIcon } from "@ionic/react";
 import { ErrorMessage } from "@hookform/error-message";
 import { useForm, SubmitHandler, FieldValues } from "react-hook-form";
+import styles from "./PasswordForm.module.css";
 
 interface PasswordFormProps {
   onSubmit: SubmitHandler<FieldValues>;
   submitBtnText: string;
   btnIcon: string;
+  placeholder: string;
 }
 
 const PasswordForm: React.FC<PasswordFormProps> = ({
   onSubmit,
   submitBtnText,
   btnIcon,
+  placeholder,
 }) => {
   const {
     handleSubmit,
@@ -21,10 +24,8 @@ const PasswordForm: React.FC<PasswordFormProps> = ({
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
-      <IonItem>
+      <div className={styles.input}>
         <IonInput
-          label="Insira sua Senha"
-          labelPlacement="floating"
           color={errors.senha ? "danger" : ""}
           type="password"
           {...register("senha", {
@@ -34,8 +35,10 @@ const PasswordForm: React.FC<PasswordFormProps> = ({
               message: "A senha deve ter exatamente 10 caracteres ASCII",
             },
           })}
+          placeholder={placeholder}
+          aria-label="senha"
         />
-      </IonItem>
+      </div>
       <ErrorMessage
         errors={errors}
         name="senha"
