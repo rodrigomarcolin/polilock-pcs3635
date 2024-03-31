@@ -7,8 +7,7 @@ import {
   IonToolbar,
 } from "@ionic/react";
 
-import ConnectionIndicator from "../../components/ConnectionIndicator";
-
+import MqttDebugCard from "./MqttDebugCard";
 import styles from "./DebugPage.module.css";
 import { cafe } from "ionicons/icons";
 import { useMqtt } from "../../contexts/MqttContext";
@@ -35,7 +34,8 @@ const DebugPage: React.FC = () => {
             <IonIcon icon={cafe} className={styles.textIcon} />
           </IonTitle>
         </IonToolbar>
-        <ConnectionIndicator isConnected={isConnected} />
+
+        <MqttDebugCard />
       </IonContent>
     </IonPage>
   );

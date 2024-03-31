@@ -16,9 +16,12 @@ import BlockedModal from "./BlockedModal";
 import { useMqtt } from "../../contexts/MqttContext";
 import VerifyPasswordForm from "./VerifyPasswordForm";
 import { useEffect } from "react";
+import { getMqttTopic } from "../../config";
 
 const UnlockPage: React.FC = () => {
   const { client } = useMqtt();
+  const blockedTopic = getMqttTopic("blocked");
+  const lockedTopic = getMqttTopic("locked");
 
   const [presentUnlockedModal, dismissUnlockedMOdal] = useIonModal(
     UnlockedModal,
@@ -31,11 +34,37 @@ const UnlockPage: React.FC = () => {
     onDismiss: () => dismissBlockedModal(),
   });
 
+  const handleBlocked = (message: string) => {
+    if (message === "blocked") {
+      presentBlockedModal();
+    }
+  };
+
+  const handleLocked = (message: string) => {
+    if (message === "unlocked") {
+      presentUnlockedModal();
+    }
+  };
+
+  const handleIncomingMessages = (topic: string, message: any) => {
+    console.log("message", message.toString(), "on topic", topic);
+    switch (topic) {
+      case blockedTopic:
+        handleBlocked(message.toString());
+        break;
+      case lockedTopic:
+        handleLocked(message.toString());
+        break;
+    }
+  };
+
   useEffect(() => {
-    client?.on("message", (message) => {
-      console.log("received message");
-      console.log(message);
-    });
+    client?.on("message", handleIncomingMessages);
+
+    // Clean up function
+    return () => {
+      client?.removeListener("message", handleIncomingMessages);
+    };
   }, []);
 
   return (

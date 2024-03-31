@@ -5,25 +5,28 @@ import {
   IonTitle,
   IonToolbar,
 } from "@ionic/react";
-import { SubmitHandler, FieldValues } from "react-hook-form";
-import {  StatusToRepresentationMap } from "../../types";
+
 import ModifyPasswordForm from "./ModifyPasswordForm";
 
-import { closeCircle } from "ionicons/icons";
+import { useMqtt } from "../../contexts/MqttContext";
+import { useEffect } from "react";
+import StateList from "./StateList";
 
 const ManagePage: React.FC = () => {
-  const onSubmit: SubmitHandler<FieldValues> = (data) => {
-    console.log("testando submit");
-    console.log(data.senha);
+  const { client } = useMqtt();
+
+  const onMessage = (topic: string, payload: any) => {
+    console.log("received", payload, "on", topic);
   };
 
-  const blockedStatusRep: StatusToRepresentationMap = {
-    blocked: {
-      color: "danger",
-      name: "Bloqueado",
-      icon: closeCircle,
-    },
-  };
+  useEffect(() => {
+    client?.on("message", onMessage);
+
+    // Clean up function
+    return () => {
+      client?.removeListener("message", onMessage);
+    };
+  }, []);
 
   return (
     <IonPage>
@@ -39,7 +42,8 @@ const ManagePage: React.FC = () => {
           </IonToolbar>
         </IonHeader>
 
-        <ModifyPasswordForm/>
+        <ModifyPasswordForm />
+        <StateList />
       </IonContent>
     </IonPage>
   );

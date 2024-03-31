@@ -11,4 +11,5 @@ export interface StatusIndicatorInterface {
   statusToRep: StatusToRepresentationMap;
   status: string;
   iconSize: "large" | "small";
+  defaultStatus: string;
 }
