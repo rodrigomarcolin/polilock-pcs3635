@@ -49,6 +49,7 @@ const PasswordForm: React.FC<PasswordFormProps> = ({
           onClick={() => console.log("Erros:", errors)}
           className="ion-margin-top"
           type="submit"
+          expand="full"
         >
           <IonIcon slot="start" icon={btnIcon}></IonIcon>
           {submitBtnText}

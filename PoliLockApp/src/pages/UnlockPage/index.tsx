@@ -7,16 +7,15 @@ import {
   IonButton,
   useIonModal,
 } from "@ionic/react";
-import { SubmitHandler, FieldValues } from "react-hook-form";
-import PasswordForm from "../../components/PasswordForm";
-import { lockOpen } from "ionicons/icons";
 
 import UnlockedModal from "./UnlockedModal";
 import BlockedModal from "./BlockedModal";
 import { useMqtt } from "../../contexts/MqttContext";
-import VerifyPasswordForm from "./VerifyPasswordForm";
 import { useEffect } from "react";
 import { getMqttTopic } from "../../config";
+
+import LockBtnCard from "./LockBtnCard";
+import VerifyPasswordForm from "./VerifyPasswordForm";
 
 const UnlockPage: React.FC = () => {
   const { client } = useMqtt();
@@ -82,6 +81,7 @@ const UnlockPage: React.FC = () => {
         </IonHeader>
 
         <VerifyPasswordForm />
+        <LockBtnCard />
       </IonContent>
     </IonPage>
   );

@@ -6,6 +6,8 @@ import {
   IonList,
   IonItem,
   IonLabel,
+  IonButton,
+  IonIcon,
 } from "@ionic/react";
 
 import StatusIndicator from "../../../components/StatusIndicator";
@@ -17,17 +19,21 @@ import {
   checkmarkCircle,
   lockClosed,
   lockOpen,
+  refresh,
 } from "ionicons/icons";
 import { useEffect, useState } from "react";
+import styles from "./StateList.module.css";
 
 const StateList: React.FC = () => {
-  const { client } = useMqtt();
+  const { client, publish } = useMqtt();
 
   const [lockedStatus, setLockedStatus] = useState<string>("locked");
   const [blockedStatus, setBlockedStatus] = useState<string>("unblocked");
 
   const lockedTopic = getMqttTopic("locked");
   const blockedTopic = getMqttTopic("blocked");
+
+  const resetTopic = getMqttTopic("reset");
 
   const handleIncomingMessages = (topic: string, message: any) => {
     console.log("Agora o armário está", message.toString());
@@ -77,10 +83,25 @@ const StateList: React.FC = () => {
     },
   };
 
+  const publishReset = () => {
+    publish(resetTopic, "reset");
+  };
+
   return (
     <IonCard>
       <IonCardHeader>
-        <IonCardTitle>Armário</IonCardTitle>
+        <IonCardTitle className={styles.header}>
+          Armário
+          <IonButton
+            color="danger"
+            className="ion-margin-top"
+            type="submit"
+            onClick={() => publishReset()}
+          >
+            <IonIcon slot="start" icon={refresh}></IonIcon>
+            Resetar
+          </IonButton>
+        </IonCardTitle>
       </IonCardHeader>
 
       <IonCardContent>

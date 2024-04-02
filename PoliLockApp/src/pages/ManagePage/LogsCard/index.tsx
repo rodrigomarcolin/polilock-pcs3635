@@ -47,7 +47,7 @@ const LogsCard: React.FC = () => {
   return (
     <IonCard>
       <IonCardHeader>
-        <IonCardTitle>Logs</IonCardTitle>
+        <IonCardTitle>Monitoramento</IonCardTitle>
       </IonCardHeader>
 
       <LogsList logs={logs} />

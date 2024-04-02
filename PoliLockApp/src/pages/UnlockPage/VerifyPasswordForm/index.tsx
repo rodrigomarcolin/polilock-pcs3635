@@ -6,7 +6,7 @@ import {
 } from "@ionic/react";
 import { SubmitHandler, FieldValues } from "react-hook-form";
 import PasswordForm from "../../../components/PasswordForm";
-import { create } from "ionicons/icons";
+import { lockOpen } from "ionicons/icons";
 import { useMqtt } from "../../../contexts/MqttContext";
 
 const VerifyPasswordForm: React.FC = () => {
@@ -27,7 +27,7 @@ const VerifyPasswordForm: React.FC = () => {
         <PasswordForm
           onSubmit={onSubmit}
           submitBtnText="Destrancar"
-          btnIcon={create}
+          btnIcon={lockOpen}
           placeholder="Senha"
         />
       </IonCardContent>
