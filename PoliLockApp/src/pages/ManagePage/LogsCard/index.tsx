@@ -37,7 +37,12 @@ const LogsCard: React.FC = () => {
   const refreshLogs = async () => {
     setLoadingSupa(true);
     try {
-      const response = await supabase?.from("logs").select();
+      const response = await supabase
+        ?.from("logs")
+        .select()
+        .order("date", { ascending: false })
+        .limit(30);
+
       const data = response?.data;
       setLogs(data);
     } catch {
@@ -56,6 +61,9 @@ const LogsCard: React.FC = () => {
 
   useEffect(() => {
     refreshLogs();
+    const intervalId = setInterval(refreshLogs, 5000);
+
+    return () => clearInterval(intervalId);
   }, [supabase]);
 
   const logsTopic = getMqttTopic("logs");
