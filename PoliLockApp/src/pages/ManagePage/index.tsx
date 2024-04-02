@@ -6,11 +6,12 @@ import {
   IonToolbar,
 } from "@ionic/react";
 
-import ModifyPasswordForm from "./ModifyPasswordForm";
-
 import { useMqtt } from "../../contexts/MqttContext";
 import { useEffect } from "react";
+
+import ModifyPasswordForm from "./ModifyPasswordForm";
 import StateList from "./StateList";
+import LogsCard from "./LogsCard";
 
 const ManagePage: React.FC = () => {
   const { client } = useMqtt();
@@ -44,6 +45,7 @@ const ManagePage: React.FC = () => {
 
         <ModifyPasswordForm />
         <StateList />
+        <LogsCard />
       </IonContent>
     </IonPage>
   );

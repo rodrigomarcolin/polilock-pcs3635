@@ -1,5 +1,4 @@
-export const MQTT_URL =
-  "wss://HOST:8884/mqtt";
+export const MQTT_URL = "wss://HOST:8884/mqtt";
 export const MQTT_USER = "";
 export const MQTT_PASSWORD = "";
 
@@ -9,3 +8,7 @@ const MQTT_ROUTES = ["verify", "modify", "locked", "blocked", "logs"];
 export const getMqttTopic = (route: string) => `${MQTT_BASE_TOPIC}/${route}`;
 
 export const MQTT_TOPICS = MQTT_ROUTES.map((route) => getMqttTopic(route));
+
+export const SUPABASE_URL = "";
+
+export const SUPABASE_API_KEY = "";

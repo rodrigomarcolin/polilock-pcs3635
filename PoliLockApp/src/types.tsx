@@ -13,3 +13,8 @@ export interface StatusIndicatorInterface {
   iconSize: "large" | "small";
   defaultStatus: string;
 }
+
+export interface LogInterface {
+  message: string;
+  date: string;
+}
