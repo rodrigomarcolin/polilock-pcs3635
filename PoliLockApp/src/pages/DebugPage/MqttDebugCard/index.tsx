@@ -12,6 +12,7 @@ import { useMqtt } from "../../../contexts/MqttContext";
 import { getMqttTopic } from "../../../config";
 import { StatusToRepresentationMap } from "../../../types";
 import { airplane, wifi } from "ionicons/icons";
+import MqttConnectForm from "./MqttConnectForm";
 
 const MqttDebugCard: React.FC = () => {
   const { client, isConnected } = useMqtt();
@@ -47,6 +48,8 @@ const MqttDebugCard: React.FC = () => {
           </IonItem>
         </IonList>
       </IonCardContent>
+
+      <MqttConnectForm />
     </IonCard>
   );
 };

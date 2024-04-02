@@ -8,13 +8,9 @@ import {
 } from "@ionic/react";
 
 import MqttDebugCard from "./MqttDebugCard";
-import styles from "./DebugPage.module.css";
-import { cafe } from "ionicons/icons";
-import { useMqtt } from "../../contexts/MqttContext";
+import DebugWarningToolbar from "./DebugWarningToolbar";
 
 const DebugPage: React.FC = () => {
-  const { isConnected } = useMqtt();
-
   return (
     <IonPage>
       <IonHeader>
@@ -28,13 +24,8 @@ const DebugPage: React.FC = () => {
             <IonTitle size="large">DEBUG</IonTitle>
           </IonToolbar>
         </IonHeader>
-        <IonToolbar className={styles.footerToolbar}>
-          <IonTitle size="small" className={styles.footerText}>
-            proceda com cuidado, apenas para programadores
-            <IonIcon icon={cafe} className={styles.textIcon} />
-          </IonTitle>
-        </IonToolbar>
 
+        <DebugWarningToolbar />
         <MqttDebugCard />
       </IonContent>
     </IonPage>
