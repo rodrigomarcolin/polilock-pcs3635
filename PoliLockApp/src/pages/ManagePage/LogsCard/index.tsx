@@ -7,6 +7,8 @@ import {
   IonCardTitle,
   IonIcon,
   IonInput,
+  IonItem,
+  IonSpinner,
 } from "@ionic/react";
 
 import { useEffect, useState } from "react";
@@ -22,6 +24,7 @@ import { refresh } from "ionicons/icons";
 
 const LogsCard: React.FC = () => {
   const [supabase, setSupabase] = useState<SupabaseClient | undefined>();
+  const [loadingSupa, setLoadingSupa] = useState<boolean>(false);
   const [logs, setLogs] = useState<any>();
   const { publish } = useMqtt();
 
@@ -32,16 +35,28 @@ const LogsCard: React.FC = () => {
   } = useForm();
 
   const refreshLogs = async () => {
-    const response = await supabase?.from("logs").select();
-    const data = response?.data;
-    setLogs(data);
+    setLoadingSupa(true);
+    try {
+      const response = await supabase?.from("logs").select();
+      const data = response?.data;
+      setLogs(data);
+    } catch {
+      alert(
+        "Não foi possível carregar os logs. Verifique sua conexão com a internet"
+      );
+    } finally {
+      setLoadingSupa(false);
+    }
   };
 
   useEffect(() => {
     const supabase = createClient(SUPABASE_URL, SUPABASE_API_KEY);
     setSupabase(supabase);
-    refreshLogs();
   }, []);
+
+  useEffect(() => {
+    refreshLogs();
+  }, [supabase]);
 
   const logsTopic = getMqttTopic("logs");
 
@@ -52,7 +67,16 @@ const LogsCard: React.FC = () => {
   return (
     <IonCard>
       <IonCardHeader>
-        <IonCardTitle>Monitoramento</IonCardTitle>
+        <IonCardTitle className={styles.title}>
+          Monitoramento
+          {loadingSupa ? (
+            <IonItem>
+              <IonSpinner name="dots"></IonSpinner>
+            </IonItem>
+          ) : (
+            ""
+          )}
+        </IonCardTitle>
       </IonCardHeader>
 
       <LogsList logs={logs} />
@@ -68,14 +92,14 @@ const LogsCard: React.FC = () => {
         </IonButton>
       </IonCardContent>
 
-      {/* <form onSubmit={handleSubmit(onSubmit)}>
+      <form onSubmit={handleSubmit(onSubmit)}>
         <div className={styles.input}>
-        <IonInput {...register("log")} placeholder="Log aqui" />
+          <IonInput {...register("log")} placeholder="Log aqui" />
         </div>
         <IonButton className="ion-margin-top" type="submit" expand="full">
-        Publicar LOG
+          Publicar LOG
         </IonButton>
-      </form> */}
+      </form>
     </IonCard>
   );
 };
