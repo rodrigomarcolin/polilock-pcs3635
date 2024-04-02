@@ -89,25 +89,15 @@ const LogsCard: React.FC = () => {
 
       <LogsList logs={logs} />
       <IonCardContent>
-        <IonButton
-          className="ion-margin-top"
-          type="submit"
-          onClick={() => refreshLogs()}
-          expand="full"
-        >
-          <IonIcon slot="start" icon={refresh}></IonIcon>
-          Recarregar Logs
-        </IonButton>
-      </IonCardContent>
-
-      <form onSubmit={handleSubmit(onSubmit)}>
+        {/* <form onSubmit={handleSubmit(onSubmit)}>
         <div className={styles.input}>
           <IonInput {...register("log")} placeholder="Log aqui" />
         </div>
         <IonButton className="ion-margin-top" type="submit" expand="full">
           Publicar LOG
         </IonButton>
-      </form>
+      </form> */}
+      </IonCardContent>
     </IonCard>
   );
 };
