@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
-import mqtt, { IClientOptions } from "mqtt";
+import mqtt, { IClientOptions } from "precompiled-mqtt";
 import { MQTT_URL, MQTT_USER, MQTT_PASSWORD, MQTT_TOPICS } from "../config";
 
 interface MqttContextType {

@@ -7,11 +7,18 @@ import {
 import { SubmitHandler, FieldValues } from "react-hook-form";
 import PasswordForm from "../../../components/PasswordForm";
 import { create } from "ionicons/icons";
+import { getMqttTopic } from "../../../config";
+import { useMqtt } from "../../../contexts/MqttContext";
 
 const ModifyPasswordForm: React.FC = () => {
+  const { publish } = useMqtt();
+  const modifyTopic = getMqttTopic("modify");
+  const startTopic = getMqttTopic("start");
+
   const onSubmit: SubmitHandler<FieldValues> = (data) => {
-    console.log("testando submit");
-    console.log(data.senha);
+    console.log("testando submit", data.senha);
+    publish(startTopic, "start");
+    publish(modifyTopic, data.senha);
   };
 
   return (
