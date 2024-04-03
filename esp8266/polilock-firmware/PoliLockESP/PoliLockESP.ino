@@ -1,4 +1,4 @@
-#include "MqttCredentials.h"
+ #include "MqttCredentials.h"
 #include <ESP8266WiFi.h>
 #include <PubSubClient.h>
 #include <SoftwareSerial.h>
@@ -32,7 +32,6 @@
 #define BLOCKED_MESSAGE "blocked"
 #define UNBLOCKED_MESSAGE "unblocked"
 
-#define RED_LED_PIN D8
 #define VERIFY_TOPIC "dagames/armarios/1/verify"
 #define VERIFY_OPCODE 'v'
 
@@ -132,7 +131,8 @@ public:
           client.publish(topic.c_str(), truthyMessage.c_str());
         }
         Serial.println(truthyMessage);
-        logger("Mudança no estado! Armário " + truthyMessage);
+        digitalWrite(RED_LED_PIN, HIGH);
+        logger("Error: Armário " + truthyMessage);
     }
 
     virtual void onTrueToFalse()
@@ -143,7 +143,8 @@ public:
           client.publish(topic.c_str(), falsyMessage.c_str());
         }
         Serial.println(falsyMessage);
-        logger("Mudança no estado! Armário " + falsyMessage);   
+        digitalWrite(RED_LED_PIN, LOW);
+        logger("Info: Armário " + falsyMessage);   
     }
 
     void begin()
@@ -192,11 +193,10 @@ public:
         if (client.connected()) {
           client.publish(topic.c_str(), truthyMessage.c_str());
         }
-        digitalWrite(RED_LED_PIN, HIGH);
         digitalWrite(GREEN_LED_PIN, LOW);
         apitaDestrancar();
         closeLock();
-        logger("Trancando o armário!");
+        logger("Info: Trancando o armário!");
     }
 
     void onFalseToTrue() override
@@ -209,7 +209,7 @@ public:
         digitalWrite(GREEN_LED_PIN, HIGH);
         apitaDestrancar();
         openLock();
-        logger("Senha correta! Destrancando...");
+        logger("Info: Senha correta inserida. Destrancando...");
     }
 };
 
@@ -261,6 +261,7 @@ void setup()
 
 void loop()
 {
+
     if (!client.connected())
     {
         reconnect();
@@ -387,7 +388,7 @@ void reconnect()
 void modifyPassword(const String &password)
 {
     Serial.println("modifying password!");
-    logger("Senha recebida! Modificando para a senha " + password);
+    logger("Info: Modificando para a senha " + password);
     softSerial.write(MODIFY_OPCODE);
     delay(OP_TO_PASS_DELAY);
     softSerial.write(password.c_str(), password.length());
@@ -401,21 +402,21 @@ void verifyPassword(const String &password)
         return;
     }
     Serial.println("verifying password!");
-    logger("Senha recebida! Verificando a senha " + password );
+    logger("Info: Verificando a senha");
     softSerial.write(VERIFY_OPCODE);
     delay(OP_TO_PASS_DELAY);
     softSerial.write(password.c_str(), password.length());
 }
 
 void mandaIniciar() {
-    logger("Mandando sinal de início...");
+    logger("Warning: Mandando sinal de início...");
     digitalWrite(INICIAR_PIN, HIGH);
     delay(50);
     digitalWrite(INICIAR_PIN, LOW);
 }
 
 void mandaResetar() {
-    logger("Resetando o sistema...");
+    logger("Warning: Resetando o sistema...");
     digitalWrite(RESET_PIN, HIGH);
     delay(50);
     digitalWrite(RESET_PIN, LOW);
