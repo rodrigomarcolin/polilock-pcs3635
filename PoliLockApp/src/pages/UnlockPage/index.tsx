@@ -18,7 +18,9 @@ import LockBtnCard from "./LockBtnCard";
 import VerifyPasswordForm from "./VerifyPasswordForm";
 
 const UnlockPage: React.FC = () => {
-    const { isLocked, isBlocked } = useMqtt();
+    const { client } = useMqtt();
+    const blockedTopic = getMqttTopic("blocked");
+    const lockedTopic = getMqttTopic("locked");
 
     const [presentUnlockedModal, dismissUnlockedMOdal] = useIonModal(
         UnlockedModal,
@@ -31,17 +33,38 @@ const UnlockPage: React.FC = () => {
         onDismiss: () => dismissBlockedModal(),
     });
 
-    useEffect(() => {
-        if (!isBlocked) {
+    const handleBlocked = (message: string) => {
+        if (message === "blocked") {
             presentBlockedModal();
         }
-    }, [isBlocked]);
+    };
 
-    useEffect(() => {
-        if (!isLocked) {
+    const handleLocked = (message: string) => {
+        if (message === "unlocked") {
             presentUnlockedModal();
         }
-    }, [isLocked]);
+    };
+
+    const handleIncomingMessages = (topic: string, message: any) => {
+        console.log("message", message.toString(), "on topic", topic);
+        switch (topic) {
+            case blockedTopic:
+                handleBlocked(message.toString());
+                break;
+            case lockedTopic:
+                handleLocked(message.toString());
+                break;
+        }
+    };
+
+    useEffect(() => {
+        client?.on("message", handleIncomingMessages);
+
+        // Clean up function
+        return () => {
+            client?.removeListener("message", handleIncomingMessages);
+        };
+    }, []);
 
     return (
         <IonPage>

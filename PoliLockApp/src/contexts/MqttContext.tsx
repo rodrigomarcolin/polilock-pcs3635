@@ -47,9 +47,11 @@ export const MqttProvider: React.FC<{ children: React.ReactNode }> = ({
   }, []);
 
   const updateStateOnMessage = (topic: string, message: any) => {
+    console.log(`received ${message.toString()} on topic ${topic}`)
+    let msg = (message.toString());
+
     switch (topic) {
       case blockedTopic:
-        let msg = (message.toString());
         setIsBlocked(msg === "blocked");
         break;
       case lockedTopic:
