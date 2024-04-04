@@ -23,16 +23,16 @@ const ManagePage: React.FC = () => {
     console.log("received", payload, "on", topic);
   };
 
-  // useEffect(() => {
-  //   client?.on("message", onMessage);
-  //   const supabase = createClient(SUPABASE_URL, SUPABASE_API_KEY);
-  //   setSupabase(supabase);
+  useEffect(() => {
+    // client?.on("message", onMessage);
+    const supabase = createClient(SUPABASE_URL, SUPABASE_API_KEY);
+    setSupabase(supabase);
 
-  //   // Clean up function
-  //   return () => {
-  //     client?.removeListener("message", onMessage);
-  //   };
-  // }, []);
+    // Clean up function
+    // return () => {
+    //   client?.removeListener("message", onMessage);
+    // };
+  }, []);
 
   return (
     <IonPage>
