@@ -401,10 +401,14 @@ void verifyPassword(const String &password)
         Serial.println("Couldn't verify password. System is blocked.");
         return;
     }
+ 
     Serial.println("verifying password!");
     logger("Info: Verificando a senha");
     softSerial.write(VERIFY_OPCODE);
     delay(OP_TO_PASS_DELAY);
+    if (digitalRead(IS_LOCKED_PIN) == LOW) {
+      logger("Warning: Tentativa mal-sucedida de verificar a senha.");
+    }
     softSerial.write(password.c_str(), password.length());
 }
 
