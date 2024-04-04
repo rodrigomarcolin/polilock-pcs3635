@@ -22,8 +22,10 @@ import styles from "./LogsCard.module.css";
 import { useMqtt } from "../../../contexts/MqttContext";
 import { refresh } from "ionicons/icons";
 
-const LogsCard: React.FC = () => {
-  const [supabase, setSupabase] = useState<SupabaseClient | undefined>();
+interface LogsCardInterface {
+  supabase: SupabaseClient | undefined;
+}
+const LogsCard: React.FC<LogsCardInterface> = ({ supabase }) => {
   const [loadingSupa, setLoadingSupa] = useState<boolean>(false);
   const [logs, setLogs] = useState<any>();
   const { publish } = useMqtt();
@@ -53,11 +55,6 @@ const LogsCard: React.FC = () => {
       setLoadingSupa(false);
     }
   };
-
-  useEffect(() => {
-    const supabase = createClient(SUPABASE_URL, SUPABASE_API_KEY);
-    setSupabase(supabase);
-  }, []);
 
   useEffect(() => {
     refreshLogs();

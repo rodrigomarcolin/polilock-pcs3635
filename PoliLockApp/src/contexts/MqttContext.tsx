@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import mqtt, { IClientOptions } from "precompiled-mqtt";
-import { MQTT_URL, MQTT_USER, MQTT_PASSWORD, MQTT_TOPICS } from "../config";
+import { MQTT_URL, MQTT_USER, MQTT_PASSWORD, MQTT_TOPICS, getMqttTopic } from "../config";
 
 interface MqttContextType {
   client: mqtt.MqttClient | null;
@@ -10,16 +10,20 @@ interface MqttContextType {
   errors: string[];
   connect: (url: string, username: string, password: string) => void;
   isConnecting: boolean;
+  isBlocked: boolean;
+  isLocked: boolean;
 }
 
 const MqttContext = createContext<MqttContextType>({
   client: null,
-  publish: () => {},
+  publish: () => { },
   isConnected: false,
   hasError: false,
   errors: [],
-  connect: () => {},
+  connect: () => { },
   isConnecting: false,
+  isBlocked: false,
+  isLocked: false
 });
 
 export const useMqtt = () => useContext(MqttContext);
@@ -32,10 +36,27 @@ export const MqttProvider: React.FC<{ children: React.ReactNode }> = ({
   const [isConnecting, setIsConnecting] = useState<boolean>(false);
   const [hasError, setHasError] = useState<boolean>(false);
   const [errors, setErrors] = useState<string[]>([]);
+  const [isLocked, setIsLocked] = useState<boolean>(false);
+  const [isBlocked, setIsBlocked] = useState<boolean>(false);
+
+  const lockedTopic = getMqttTopic("locked");
+  const blockedTopic = getMqttTopic("blocked");
 
   useEffect(() => {
     connect(MQTT_URL, MQTT_USER, MQTT_PASSWORD); // Connect with default values on load
   }, []);
+
+  const updateStateOnMessage = (topic: string, message: any) => {
+    switch (topic) {
+      case blockedTopic:
+        let msg = (message.toString());
+        setIsBlocked(msg === "blocked");
+        break;
+      case lockedTopic:
+        setIsLocked(msg === "locked");
+        break;
+    }
+  }
 
   const connect = (url: string, username: string, password: string) => {
     const options: IClientOptions = {
@@ -67,6 +88,7 @@ export const MqttProvider: React.FC<{ children: React.ReactNode }> = ({
         setIsConnected(false);
       });
 
+      mqttClient.on("message", updateStateOnMessage);
       mqttClient.on("error", (error: Error) => {
         setIsConnected(false);
         setIsConnecting(false);
@@ -97,6 +119,8 @@ export const MqttProvider: React.FC<{ children: React.ReactNode }> = ({
         errors,
         connect,
         isConnecting,
+        isBlocked,
+        isLocked
       }}
     >
       {children}

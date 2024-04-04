@@ -1,11 +1,11 @@
 import {
-  IonContent,
-  IonHeader,
-  IonPage,
-  IonTitle,
-  IonToolbar,
-  IonButton,
-  useIonModal,
+    IonContent,
+    IonHeader,
+    IonPage,
+    IonTitle,
+    IonToolbar,
+    IonButton,
+    useIonModal,
 } from "@ionic/react";
 
 import UnlockedModal from "./UnlockedModal";
@@ -18,73 +18,50 @@ import LockBtnCard from "./LockBtnCard";
 import VerifyPasswordForm from "./VerifyPasswordForm";
 
 const UnlockPage: React.FC = () => {
-  const { client } = useMqtt();
-  const blockedTopic = getMqttTopic("blocked");
-  const lockedTopic = getMqttTopic("locked");
+    const { isLocked, isBlocked } = useMqtt();
 
-  const [presentUnlockedModal, dismissUnlockedMOdal] = useIonModal(
-    UnlockedModal,
-    {
-      onDismiss: () => dismissUnlockedMOdal(),
-    }
-  );
+    const [presentUnlockedModal, dismissUnlockedMOdal] = useIonModal(
+        UnlockedModal,
+        {
+            onDismiss: () => dismissUnlockedMOdal(),
+        }
+    );
 
-  const [presentBlockedModal, dismissBlockedModal] = useIonModal(BlockedModal, {
-    onDismiss: () => dismissBlockedModal(),
-  });
+    const [presentBlockedModal, dismissBlockedModal] = useIonModal(BlockedModal, {
+        onDismiss: () => dismissBlockedModal(),
+    });
 
-  const handleBlocked = (message: string) => {
-    if (message === "blocked") {
-      presentBlockedModal();
-    }
-  };
+    useEffect(() => {
+        if (!isBlocked) {
+            presentBlockedModal();
+        }
+    }, [isBlocked]);
 
-  const handleLocked = (message: string) => {
-    if (message === "unlocked") {
-      presentUnlockedModal();
-    }
-  };
+    useEffect(() => {
+        if (!isLocked) {
+            presentUnlockedModal();
+        }
+    }, [isLocked]);
 
-  const handleIncomingMessages = (topic: string, message: any) => {
-    console.log("message", message.toString(), "on topic", topic);
-    switch (topic) {
-      case blockedTopic:
-        handleBlocked(message.toString());
-        break;
-      case lockedTopic:
-        handleLocked(message.toString());
-        break;
-    }
-  };
+    return (
+        <IonPage>
+            <IonHeader>
+                <IonToolbar>
+                    <IonTitle>Destrancar Armário</IonTitle>
+                </IonToolbar>
+            </IonHeader>
+            <IonContent className={"ion-padding ion-margin"} fullscreen>
+                <IonHeader collapse="condense">
+                    <IonToolbar>
+                        <IonTitle size="large">Destrancar Armário</IonTitle>
+                    </IonToolbar>
+                </IonHeader>
 
-  useEffect(() => {
-    client?.on("message", handleIncomingMessages);
-
-    // Clean up function
-    return () => {
-      client?.removeListener("message", handleIncomingMessages);
-    };
-  }, []);
-
-  return (
-    <IonPage>
-      <IonHeader>
-        <IonToolbar>
-          <IonTitle>Destrancar Armário</IonTitle>
-        </IonToolbar>
-      </IonHeader>
-      <IonContent className={"ion-padding ion-margin"} fullscreen>
-        <IonHeader collapse="condense">
-          <IonToolbar>
-            <IonTitle size="large">Destrancar Armário</IonTitle>
-          </IonToolbar>
-        </IonHeader>
-
-        <VerifyPasswordForm />
-        <LockBtnCard />
-      </IonContent>
-    </IonPage>
-  );
+                <VerifyPasswordForm />
+                <LockBtnCard />
+            </IonContent>
+        </IonPage>
+    );
 };
 
 export default UnlockPage;
