@@ -1,3 +1,5 @@
+*Credentials.h
+.env
 BlynkCredentials.h
 MqttCredentials.h
 node_modules/
