@@ -1,0 +1,109 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "topics": "dagames/armarios/1/logs",
+        "options": {}
+      },
+      "id": "efc4789a-dac1-4c35-a571-3eb714d582be",
+      "name": "MQTT Trigger",
+      "type": "n8n-nodes-base.mqttTrigger",
+      "typeVersion": 1,
+      "position": [
+        760,
+        280
+      ],
+      "credentials": {
+        "mqtt": {
+          "id": "AIDRrifHY2APAwzw",
+          "name": "MQTT account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "tableId": "logs",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "message",
+              "fieldValue": "={{ $json.message }}"
+            },
+            {
+              "fieldId": "topic",
+              "fieldValue": "={{ $json.topic }}"
+            },
+            {
+              "fieldId": "type",
+              "fieldValue": "={{ $json.type }}"
+            }
+          ]
+        }
+      },
+      "id": "d7a588fb-30e7-41bb-aa0e-96be59e583b9",
+      "name": "Supabase",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        1180,
+        280
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "GGj9dt7AvycCVyvV",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Loop over input items and add a new field called 'myNewField' to the JSON of each one\nfor (const item of $input.all()) {\n  message = item.json.message;\n  if (message.includes('mal-sucedida')) {\n    item.json.type = 'Verification_Error';\n  }\n  else if (message.includes('Error')) {\n    item.json.type = 'Blocked';\n  }\n  else if (message.includes('unblocked')) {\n    item.json.type = 'Unblocked';\n  }\n  else if (message.includes('Trancando')) {\n    item.json.type = 'Locked';\n  }\n  else if (message.includes('Destrancando')) {\n    item.json.type = 'Unlocked';\n  }\n  else if (message.includes('Modificando')) {\n    item.json.type = 'Modify'\n  }\n  else if (message.includes('Verificando')) {\n    item.json.type = 'Verifying';\n  }\n  else if (message.includes('Mandando sinal')) {\n    item.json.type = 'Signal';\n  }\n  else if (message.includes('Resetando')) {\n    item.json.type = 'Reset';\n  }\n  else {\n    item.json.type = 'Unknow';\n  }\n}\n\nreturn $input.all();"
+      },
+      "id": "4fb934ef-8daa-4875-8a0c-7709dd40b2f8",
+      "name": "Code",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        980,
+        280
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "MQTT Trigger": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "Supabase",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "b2df0349-e81f-49ee-a5ab-ca64e3569e30",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "68f384359f78119427b5e5d445c68b4dd5476c611c89648042aec4ecebb65b77"
+  },
+  "id": "lrJfIVfKIw9DFPKz",
+  "tags": []
+}
